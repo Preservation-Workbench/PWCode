@@ -1,0 +1,45 @@
+
+drivers:
+    mysql:
+        jar:   '{JARS_DIR}/mysql-connector-java.jar'
+        class: 'com.mysql.cj.jdbc.Driver'
+        url:   'jdbc:mysql://'
+        attr:  '?autoReconnect=true&useSSL=false&useUnicode=false&serverTimezone=GMT%2B1'
+        escape: true
+
+    oracle:
+        jar:   '{JARS_DIR}/ojdbc11.jar'
+        class: 'oracle.jdbc.OracleDriver'
+        url:   'jdbc:oracle:thin:@'
+
+    postgresql:
+        jar:   '{JARS_DIR}/postgresql.jar'
+        class: 'org.postgresql.Driver'
+        url:   'jdbc:postgresql://'
+
+    sqlserver:
+        jar:   '{JARS_DIR}/mssql-jdbc.jre11.jar'
+        class: 'com.microsoft.sqlserver.jdbc.SQLServerDriver'
+        url:   'jdbc:sqlserver://'
+
+    sqlite:
+        jar:    '{JARS_DIR}/sqlite-jdbc.jar'
+        class:  'org.sqlite.JDBC'
+        url:    'jdbc:sqlite:'
+        
+    h2:
+        jar:    '{JARS_DIR}/h2.jar'
+        class:  'org.h2.Driver'
+        url:    'jdbc:h2:'        
+
+aliases:
+    #jdbc:mysql://<server>:3306/<database>?user=<user>&password=<password>&useSSL=false
+    scott_mysql:        "jdbc:mysql://localhost:3306/scottdb?user=scott&password=P@ssw0rd"
+    #jdbc:postgresql://<server>:5432/?sslmode=disable&user=<user>&password=<password>&currentSchema=<schema>
+    scott_postgresql:   "jdbc:postgresql://localhost:5432/?sslmode=disable&user=scott&password=P@ssw0rd"
+    #jdbc:sqlserver://<server>\\\<instance>:1433;databaseName=<db>;currentSchema=<schema>;user=<user>;password=<password>    
+    scott_sqlserver:    "jdbc:sqlserver://localhost\\SQLEXPRESS:1433;databaseName=scottdb;user=scott;password=P@ssw0rd"
+    #jdbc:oracle:thin:<user>/<password>@<server>:1521:<service name>
+    oracle@localhost:   "jdbc:oracle:thin:oracle/P@ssw0rd@127.0.1.1:1521/XE"
+    sqlite_file:        "jdbc:sqlite:/home/scott/file.db" # username/password not supported    
+    sqlite_memory:      "jdbc:sqlite::memory:"

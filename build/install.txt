@@ -1,0 +1,10 @@
+
+
+cargo build --release
+PYAPP_PROJECT_VERSION=0.1 PYAPP_PROJECT_NAME=pwxtract PYAPP_EXEC_SCRIPT=~/bin/PWXtract/build/install_run.py PYAPP_PYTHON_VERSION=3.10 PYAPP_FULL_ISOLATION=1 PYAPP_SKIP_INSTALL=1 cargo install pyapp --force --root ~/bin/PWXtract
+
+# TODO: Skriv om dette til skikkelig build script som laster ned pyapp.kode og genererer pyapp-bin or renamer den mm for å generere release
+--> fix samtidig så kan ha renamet binary i project root da -> endre navn på mappe hvor kode er da?
+--> Trenger linux (bash) og windows (powershell) versjoner av build script (eller "build_release"?)
+
+-> Må ha sjekk av versjon av release for hvor høyt en kan oppdatere kode fra github

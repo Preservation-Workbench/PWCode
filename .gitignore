@@ -1,0 +1,18 @@
+# Ignore directories and files
+__pycache__/
+*.py[co]
+config.yml
+config.yml.save
+pwx
+build/release/*
+deps/jars/*
+deps/java.linux/*
+deps/java.windows/*
+deps/python/*
+projects/*
+
+# exceptions to above rule
+!.gitignore
+!projects/tmp/.gitkeep
+!deps/jars/.gitkeep
+!deps/python/.gitkeep
