@@ -50,7 +50,7 @@ class Main:
     config_db: sqlite_utils.db.Database = None
     pwxtract_dir: Path = Path(__file__).resolve().parents[1]
     projects_dir: Path = Path(pwxtract_dir, "projects")
-    editor: Path = Path(pwxtract_dir, "bin", "cuda", "cudatext")
+    editor: Path = Path(pwxtract_dir, "deps", "editor", "micro")
     java_home: Path = Path(pwxtract_dir, "deps", "java." + jdk.OS)
     jars_dir: Path = Path(pwxtract_dir, "deps", "jars")
 

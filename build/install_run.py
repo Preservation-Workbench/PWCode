@@ -112,26 +112,26 @@ dl = Downloader()
 deps_jar_dir = Path(base_dir, "deps", "jars")
 jars = [
     "org.xerial:sqlite-jdbc:jar:3.42.0.0",
-     "org.postgresql:postgresql:jar:42.6.0",
-     "mysql:mysql-connector-java:jar:8.0.30",
-     "https://www.sql-workbench.eu/Workbench-Build129.zip::sqlworkbench.jar",
-     "com.microsoft.sqlserver:mssql-jdbc:jar:12.2.0.jre11",
-     "com.h2database:h2:jar:1.4.199",
-     "com.oracle.database.jdbc:ojdbc10:jar:19.19.0.0",
+    "org.postgresql:postgresql:jar:42.6.0",
+    "mysql:mysql-connector-java:jar:8.0.30",
+    "https://www.sql-workbench.eu/Workbench-Build129.zip::sqlworkbench.jar",
+    "com.microsoft.sqlserver:mssql-jdbc:jar:12.2.0.jre11",
+    "com.h2database:h2:jar:1.4.199",
+    "com.oracle.database.jdbc:ojdbc10:jar:19.19.0.0",
 ]
 
 for jar in jars:
     if jar.startswith("http"):
-        url, file_check = jar.split('::')
+        url, file_check = jar.split("::")
         if Path(deps_jar_dir, file_check).is_file():
             continue
 
         result = None
-        fil = Path(tmp_dir, url.split('/')[-1])
+        fil = Path(tmp_dir, url.split("/")[-1])
         if not fil.is_file():
             print("Downloading " + fil.name + " from " + url)
             with requests.get(url, stream=True) as r:
-                with open(fil, 'wb') as f:
+                with open(fil, "wb") as f:
                     shutil.copyfileobj(r.raw, f)
 
         if fil.suffix == ".zip":
@@ -139,7 +139,7 @@ for jar in jars:
             if not result:
                 fil.unlink()
         else:
-            result = shutil.move(fil, Path(deps_jar_dir, url.split('/')[-1]))
+            result = shutil.move(fil, Path(deps_jar_dir, url.split("/")[-1]))
 
         if result:
             print(result)
@@ -152,6 +152,30 @@ for jar in jars:
     if not jar_file.is_file():
         dl.download(artifact, filename=jar_file)
 
+# EDITOR:
+urls = {
+    "linux": "https://github.com/zyedidia/micro/releases/download/v2.0.11/micro-2.0.11-linux64.tar.gz",
+    "windows": "https://github.com/zyedidia/micro/releases/download/v2.0.11/micro-2.0.11-win64.zip",
+}
+
+url = urls[str(jdk.OS)]
+deps_editor_dir = Path(base_dir, "deps", "editor")
+if not (deps_editor_dir.is_dir() and len(os.listdir(deps_editor_dir)) > 0):
+    tmp_editor_dir = Path(tmp_dir, "editor")
+    tmp_editor_dir.mkdir(parents=True, exist_ok=True)
+    fil = Path(tmp_editor_dir, url.split("/")[-1])
+
+    if not fil.is_file():
+        print("Downloading " + fil.name + " from " + url)
+        with requests.get(url, stream=True) as r:
+            with open(fil, "wb") as f:
+                shutil.copyfileobj(r.raw, f)
+
+    shutil.unpack_archive(fil, tmp_editor_dir)
+    sub_dirs = [x for x in tmp_editor_dir.iterdir() if x.is_dir()]
+    if sub_dirs:
+        shutil.copytree(sub_dirs[0], deps_editor_dir, dirs_exist_ok=True)
+        shutil.rmtree(tmp_editor_dir)
+
 # RUN:
 runpy.run_path(Path(src_dir, "main.py"), run_name="__main__")
-

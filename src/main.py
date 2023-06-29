@@ -258,6 +258,8 @@ def run(argv):
 
     return cmds[main_cfg.command](main_cfg)
 
+    # TODO: Egen install.py som kalles fra embedded kode heller enn å ha all install kode i embedded som nå
+
     # TODO: For BKSAK: Trenger arg for copy på å utelate blob'er (til tekst-felt med ref som i archive da) -> gjør før bksak-uttrekk
     # -> stopp etter generert copy statements for å sjekk hva som utelates da
 

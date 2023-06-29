@@ -5,6 +5,7 @@ config.yml
 config.yml.save
 pwx
 build/release/*
+deps/editor/*
 deps/jars/*
 deps/java.linux/*
 deps/java.windows/*

@@ -1,3 +1,3 @@
 WIP
 
-Some features are only available on PWLinux.
+Program to copy, export and normalize data. Run subcommands for more information.
