@@ -258,6 +258,12 @@ def run(argv):
 
     return cmds[main_cfg.command](main_cfg)
 
+    # TODO:Tell antall linjer eksportert før validering heller enn antall tabeller!
+
+    # TODO: Fix at micro mener tables er åpnet i en scratch buffer samt shorcuts for å velge tabeller
+
+    # TODO: Kompilere helix som del av build? Med fix for glib?
+
     # TODO: Egen install.py som kalles fra embedded kode heller enn å ha all install kode i embedded som nå
 
     # TODO: For BKSAK: Trenger arg for copy på å utelate blob'er (til tekst-felt med ref som i archive da) -> gjør før bksak-uttrekk

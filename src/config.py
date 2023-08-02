@@ -21,17 +21,13 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import os
-import sys
 import yaml
 from pathlib import Path
-from dataclasses import dataclass, fields
+from dataclasses import dataclass
 
 import gui
-import configdb
 import sqlite_utils
 import jdk
-import project
 
 
 @dataclass()
@@ -56,7 +52,7 @@ class Main:
 
     def __post_init__(self):
         if jdk.OS == "windows":
-            self.editor = Path(str(editor) + ".exe")
+            self.editor = Path(str(self.editor) + ".exe")
 
 
 @dataclass()
@@ -96,16 +92,23 @@ def load(cfg_file):
     except PermissionError:
         pass
     except yaml.YAMLError as pe:
-        gui.print_msg(f"""ERROR: Cannot parse the configuration file: {pe}""", exit=True)
+        gui.print_msg(f"""ERROR: Cannot parse the configuration file: {pe}""",
+                      exit=True)
 
     jdbc_drivers = dict()
     for jdbc_type, cfg in configuration.get("drivers", {}).items():
         if "jar" not in cfg:
-            gui.print_msg(f"""ERROR in definition of driver type {jdbc_type}: jar file not specified.""", exit=True)
+            gui.print_msg(
+                f"""ERROR in definition of driver type {jdbc_type}: jar file not specified.""",
+                exit=True)
         elif "class" not in cfg:
-            gui.print_msg(f"""ERROR in definition of driver type {jdbc_type}: driver class not specified.""", exit=True)
+            gui.print_msg(
+                f"""ERROR in definition of driver type {jdbc_type}: driver class not specified.""",
+                exit=True)
         elif "url" not in cfg:
-            gui.print_msg(f"""ERROR in definition of driver type {jdbc_type}: url not specified.""", exit=True)
+            gui.print_msg(
+                f"""ERROR in definition of driver type {jdbc_type}: url not specified.""",
+                exit=True)
 
         jdbc_drivers[jdbc_type] = cfg
 
