@@ -28,6 +28,7 @@ from utils import _java
 import _copy
 import _archive
 import _script
+import _edit
 
 
 # def get_log_file(args):
@@ -49,7 +50,7 @@ def ensure_args_attr(attrs, args):
 
 
 def get_args(argv):
-    if len(argv) == 1 or (len(argv) == 2 and any(x in ["copy", "archive", "script"] for x in argv)):
+    if len(argv) == 1 or (len(argv) == 2 and any(x in ["copy", "archive", "script", "edit"] for x in argv)):
         argv.append("--help")
 
     common_parser = ArgumentParser("common", add_help=False)
@@ -174,7 +175,18 @@ def get_args(argv):
     script_arguments = script_parser.add_argument_group("Script")
     script_arguments.add_argument("--path", dest="path", type=str, required=True, help="Path to custom script.")
 
-    args = ensure_args_attr(["stop", "debug", "test", "source", "target", "path"], parser.parse_args())
+    # Edit:
+    edit_parser = subparsers.add_parser(
+        "edit",
+        add_help=False,
+        description="".join(("Edit a file.",)),
+        formatter_class=RawTextRichHelpFormatter,
+        parents=[common_parser],
+    )
+    edit_arguments = edit_parser.add_argument_group("edit")
+    edit_arguments.add_argument("--file", dest="file", type=str, required=True, help="Path to file.")
+
+    args = ensure_args_attr(["stop", "debug", "test", "source", "target", "path", "file"], parser.parse_args())
 
     cfg_file = Path(Path(__file__).resolve().parents[1], "config.yml")
     if not Path(cfg_file).is_file():
@@ -186,6 +198,7 @@ def get_args(argv):
         cfg_file=cfg_file,
         command=args.command,
         script_path=args.path,
+        file_path=args.file,
         debug=args.debug,
         stop=args.stop,
         test=args.test,
@@ -250,10 +263,11 @@ def run(argv):
 
 
     cmds = {
-        "configure": (lambda x: gui.show_output(main_cfg, main_cfg.cfg_file)),
+        "configure": (lambda x: gui.show(main_cfg, main_cfg.cfg_file)),
         "copy": (lambda x: _copy.run(main_cfg)),
         "archive": (lambda x: _archive.run(main_cfg)),
         "script": (lambda x: _script.run(main_cfg)),
+        "edit": (lambda x: _edit.run(main_cfg)),
     }
 
     return cmds[main_cfg.command](main_cfg)

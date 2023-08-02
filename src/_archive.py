@@ -147,7 +147,7 @@ def validate_tables(deps_list, table_deps, archived_tables, cfg):
 
     schema_path = Path(cfg.source.parent, "partial_datapackage.json")
     if validate(dp.create_schema(cfg, True, tables=deps_list, schema_path=schema_path)).valid is False:
-        gui.show_output(cfg, report, exit=True, error=True)
+        gui.show(cfg, report, exit=True, error=True)
 
     for table in deps_list:
         cfg.config_db["tables"].update(table, {"validated": 1})

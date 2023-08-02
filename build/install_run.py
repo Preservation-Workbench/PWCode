@@ -160,7 +160,7 @@ urls = {
 
 url = urls[str(jdk.OS)]
 deps_editor_dir = Path(base_dir, "deps", "editor")
-if not (deps_editor_dir.is_dir() and len(os.listdir(deps_editor_dir)) > 0):
+if not len(os.listdir(deps_editor_dir)) > 1:
     tmp_editor_dir = Path(tmp_dir, "editor")
     tmp_editor_dir.mkdir(parents=True, exist_ok=True)
     fil = Path(tmp_editor_dir, url.split("/")[-1])

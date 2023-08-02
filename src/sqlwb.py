@@ -198,7 +198,7 @@ def get_copy_statements(json_schema_file, cfg, diff_data):
                     file.write("\n" + copy_data_str)
 
     if cfg.stop == "copy":
-        gui.show_output(cfg, copy_file)
+        gui.show(cfg, copy_file)
 
     return copy_file
 

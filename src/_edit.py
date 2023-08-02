@@ -18,10 +18,10 @@ from pathlib import Path
 from dataclasses import replace
 
 import gui
+import config
 from specific_import import import_file
 
 
-def run(cfg):
-    cfg = replace(main_cfg, **{"script_path": Path(main_cfg.script_path).resolve()})
-    script = import_file(str(cfg.script_path))
-    script.run(cfg)
+def run(main_cfg):
+    cfg = config.Edit(**main_cfg.__dict__, tmp_dir=Path(main_cfg.projects_dir, "tmp"))
+    gui.show(cfg, Path(main_cfg.file_path).resolve())

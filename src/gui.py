@@ -39,29 +39,18 @@ def print_msg(msg, style="bold red", exit=False, highlight=False):
         sys.exit()
 
 
-def show_output(cfg, obj, exit=True, error=False):
-    gui = is_file = False
+def show(cfg, obj, exit=True, error=False):
+    is_file = False
 
-    if (os.name == "posix" and os.environ.get("DISPLAY")) or os.name == "nt":
-        gui = True
-
-    if type(obj).__name__ == "PosixPath" and obj.is_file():
-        is_file = True
-
-    if gui and not is_file:
+    if not (type(obj).__name__ == "PosixPath" and obj.is_file()):
         stdout_file = Path(str(cfg.tmp_dir), "std.out")
         with open(stdout_file, "w") as f:
             pprint.pprint(obj, stream=f)
 
         obj = stdout_file
 
-    if gui:
-        subprocess.call([cfg.editor, obj], stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
-    else:
-        if is_file:
-            subprocess.call(["nano", obj])
-        else:
-            richprint(obj)
+
+    subprocess.call([cfg.editor, "--config-dir", Path(cfg.editor.parent, "config"), obj])
 
     if exit:
         if error:

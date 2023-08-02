@@ -80,7 +80,7 @@ def get_include_tables(cfg):
     configdb.update_include(cfg, tables)
 
     if cfg.stop == "tables":  # Edit included tables
-        gui.show_output(cfg, table_file)  # Exits code for table editing
+        gui.show(cfg, table_file)  # Exits code for table editing
 
     if tables and not set(tables).issubset(copied_tables):
         configdb.update_table_deps(tables, cfg)

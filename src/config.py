@@ -35,6 +35,7 @@ class Main:
     cfg_file: Path
     command: str
     script_path: Path
+    file_path: Path
     debug: bool
     stop: bool
     test: bool
@@ -67,6 +68,11 @@ class Copy(Main):
     data_dir: Path = None
     tmp_dir: Path = None
     data_files_dir: Path = None
+
+
+@dataclass()
+class Edit(Main):
+    tmp_dir: Path = None
 
 
 @dataclass()

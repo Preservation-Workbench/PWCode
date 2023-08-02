@@ -296,7 +296,7 @@ def create_schema(cfg, changed, tables=[], schema_path=None):
     package.to_json(schema_path)
 
     if cfg.stop == "json":
-        gui.show_output(cfg, schema_path)
+        gui.show(cfg, schema_path)
 
     return schema_path
 
@@ -349,7 +349,7 @@ def create_ddl(schema_path, changed, args):
                     f.write("\n".join([l for l in lines if l.strip()]) + ";\n\n")
 
     if args.stop == "ddl":
-        gui.show_output(args, ddl_fk_file)
+        gui.show(args, ddl_fk_file)
 
     if args.target.type == "sqlite":
         return ddl_fk_file
