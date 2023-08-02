@@ -1,0 +1,37 @@
+color-link default "#dddddd,#161616"
+color-link comment "#7C7C7C,#161616"
+color-link identifier "#f6e58d,#161616"
+
+color-link constant "#f0932b,#161616"
+color-link constant.string "#95a6c0,#161616"
+
+color-link statement "#94c66d,#161616"
+color-link symbol "#7ec1df,#161616"
+color-link symbol.brackets "#1395d0,#161616"
+# color-link symbol.tag "bold #b975e5,#161616"
+
+color-link preproc "#d96a82,#161616"
+color-link type "#bc81e1,#161616"             
+color-link special "#ec3d3b,#161616"
+
+color-link underlined "#D33682,#161616"
+color-link error "bold #FF4444,#161616"
+color-link todo "bold #FF8844,#161616"
+color-link hlsearch "#000000,#B4EC85"
+color-link statusline "#161616,#a0a0a0"
+color-link tabbar "#161616,#C5C8C6"
+color-link indent-char "#505050,#161616"
+color-link line-number "#404040,#000000"
+color-link current-line-number "#656866,#161616"
+color-link diff-added "#00AF00"
+color-link diff-modified "#FFAF00"
+color-link diff-deleted "#D70000"
+color-link gutter-error "#FF4444,#161616"
+color-link gutter-warning "#EEEE77,#161616"
+
+color-link cursor-line "#202020"
+
+color-link color-column "#2D2F31"
+#No extended types (bool in C, etc.)
+#color-link type.extended "default"
+#Plain brackets

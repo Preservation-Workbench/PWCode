@@ -1,0 +1,57 @@
+# blue screen of death
+#0100AE (bright)
+#000084 (med)
+#00006F (ours)
+#C5E478 (debug green)
+#FF5874 (med pink)
+
+color-link default "#FFFFFF,#00006F" # ok
+color-link color-column "#01167B"
+color-link comment "#1a5c67" # ok
+color-link todo "italic #1a5c67"
+
+color-link constant "#FFFFFF" # ok
+color-link constant.bool "#FF5874" # ok
+
+color-link constant.bool.false "#FF5874" # ok
+color-link constant.bool.true "#FF5874" # ok
+
+color-link constant.number "italic #E2E2E2" # ok
+color-link constant.specialChar "#f0f0f0" # ok
+color-link constant.string "#DDDDDD" # ok
+
+color-link statement "bold #0000EE" # ok
+
+color-link special "italic #F0F0F0"
+color-link symbol "#AC885B" 
+color-link symbol.brackets "#AAAAAA" # ok
+color-link symbol.operator "bold #AAAAAA" # ok
+color-link symbol.tag "#AC885B" # ok
+
+color-link cursor-line "#0078FF" # ok
+color-link divider "#1E1E1E"
+color-link error "#FFFFFF,#ff2c83" # ok
+color-link diff-added "#8FBCBB" # ok
+color-link diff-modified "#8FBCBB" # ok
+color-link diff-deleted "#D70000" # ok
+color-link gutter-error "#9B859D"
+color-link gutter-warning "#9B859D"
+
+color-link identifier "italic #0000EE"
+# backtick quoted vars in js
+
+color-link identifier.macro "bold #C5E478"
+color-link identifier.class "bold #C792EA" # ok
+color-link identifier.var "bold #C5E478" # ok
+
+color-link indent-char "#515151"
+color-link current-line-number "#4B6479,#1D3B53" # ok
+color-link line-number "#868686,#00006F"
+color-link preproc "#C792EA"
+color-link preproc.shebang "#EF1F23" # ok
+color-link statusline "#D6DEEB,#011627" # ok
+
+color-link tabbar "#F2F0EC,#2D2D2D"
+color-link type "bold #00006f,#b1b1b1" # ok
+color-link type.keyword "#c5e478"
+color-link underlined "#8996A8"

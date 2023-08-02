@@ -1,0 +1,19 @@
+{
+    "autosu": true,
+    "basename": true,
+    "colorcolumn": 120,
+    "colorscheme": "catppuccin-frappe",
+    "cursorline": false,
+    "divchars": "  ",
+    "divreverse": false,
+    "lsp.ignoreMessages": "LS message1 to ignore|LS message 2 to ignore|...",
+    "lsp.ignoreTriggerCharacters": "completion,signature",
+    "lsp.server": "python=pylsp",
+    "microgit.command": "/usr/bin/git",
+    "mkparents": true,
+    "savecursor": true,
+    "statusformatr": " $(microgit.onbranch) ↑$(microgit.numahead) ↓$(microgit.numbehind) ↓↑$(microgit.numstaged) | commit:$(microgit.oncommit)",
+    "tabmovement": true,
+    "tabstospaces": true,
+    "xterm": true
+}

@@ -58,9 +58,9 @@ if not deps_java_dir.is_dir():
         jdk_tmp_dir = jdk_tmp_true[0]
 
     print("Optimizing java jdk...")
-    jlink = Path(jdk_tmp_dir, "bin", "jlink")
-    if jdk.OS == "windows":
-        jlink = Path(jlink.parent, "jlink.exe")
+
+    min = a if a < b else b
+    jlink = Path(jdk_tmp_dir, "bin", "jlink.exe") if jdk.OS == "windows" else Path(jdk_tmp_dir, "bin", "jlink")
 
     modules = [
         "java.base",
