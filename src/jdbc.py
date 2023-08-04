@@ -764,7 +764,7 @@ def get_conn(login, cfg):
         dbo = Dbo(login, cfg)
 
     # result = f.getvalue()
-    # gui.print_msg(str(result), cfg, style="bold red")
+     #gui.print_msg(str(result), cfg, style=gui.style.warning)
 
     return dbo
 
@@ -924,7 +924,7 @@ def get_all_tables_count(jdbc, cfg, keys=True):
         if tables_count:
             return tables_count
 
-    gui.print_msg("Retrieving metadata from " + source_or_target + " schema...", style="bold cyan")
+    gui.print_msg("Retrieving metadata from " + source_or_target + " schema...", style=gui.style.info)
 
     db_tables = get_tables(jdbc, cfg)
     if jdbc == cfg.target:
@@ -977,7 +977,7 @@ def fix_column_size(tables, first_run, cfg):
     if first_run:
         configdb.connect_column_fk(cfg)
 
-    gui.print_msg("Correcting columm lengths...", style="bold cyan")
+    gui.print_msg("Correcting columm lengths...", style=gui.style.info)
     jdbc = cfg.source
     conn = jdbc.connection
 

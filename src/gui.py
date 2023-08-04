@@ -20,8 +20,21 @@ from pathlib import Path
 
 from rich.console import Console
 from rich.pretty import pprint as richprint
+from dataclasses import dataclass
 import pprint
 
+
+@dataclass()
+class Style:
+    warning: str = "#ED8796"
+    warning_bold: str = "bold #ED8796"
+    ok: str = "#A6DA95"
+    ok_bold: str = "bold #A6DA95"
+    info: str = "#8AADF4"
+    info_bold: str = "bold #8AADF4"
+
+
+style = Style()
 console = Console()
 
 
@@ -33,14 +46,13 @@ def print_overwrite(msg):
     print_overwrite.last_msg = msg
 
 
-def print_msg(msg, style="bold red", exit=False, highlight=False):
+def print_msg(msg, style=style.warning, exit=False, highlight=False):
     console.print(msg, style=style, highlight=highlight)
     if exit:
         sys.exit()
 
 
 def show(cfg, obj, exit=True, error=False):
-    is_file = False
 
     if not (type(obj).__name__ == "PosixPath" and obj.is_file()):
         stdout_file = Path(str(cfg.tmp_dir), "std.out")
@@ -49,11 +61,14 @@ def show(cfg, obj, exit=True, error=False):
 
         obj = stdout_file
 
-
-    subprocess.call([cfg.editor, "--config-dir", Path(cfg.editor.parent, "config"), obj])
+    env = os.environ.copy()
+    env["PATH"] = str(Path(cfg.pwxtract_dir, "deps", "python", "bin")) + os.pathsep + env["PATH"]
+    env["PYTHONPATH"] = str(Path(cfg.pwxtract_dir, "deps", "python"))
+    subprocess.call([cfg.editor, "--config-dir", Path(cfg.editor.parent, "config"), obj], env=env)
 
     if exit:
         if error:
-            print_msg("Exit and open error message.", style="bold red", exit=exit)
+            print_msg("Exit and open error message.", style=style.warning, exit=exit)
         else:
-            print_msg("Stopped for manual editing of '" + str(obj) + "'.", style="bold cyan", exit=exit)
+            print_msg("Stopped for manual editing of '" + str(obj) + "'.", style=style.info, exit=exit)
+

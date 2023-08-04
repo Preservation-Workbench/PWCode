@@ -13,20 +13,15 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import sys
 from pathlib import Path
 from collections import OrderedDict
-import tarfile
 import operator
-import tarfile
-import re
 import os
 import json
 import shutil
 import csv
 
 from utils import _file
-from pathvalidate import replace_symbol
 from command_runner import command_runner
 from rich.prompt import Confirm
 import configdb
@@ -48,19 +43,17 @@ def get_sources(main_cfg):
     for pth in Path(source, "content").iterdir():
         db_path = Path(pth, pth.name + ".db")
         if pth.is_dir():
-            if (
-                pth.name != "documents"
-                and not Path(pth, "datapackage.json").is_file()  # Missing datapackage schema for db source
-                or any(Path(pth).iterdir()) is False  # Empty directory
-                or (pth.name != "documents" and not db_path.is_file())  # Missing db for db source
-            ):
+            if (pth.name != "documents"
+                    and not Path(pth, "datapackage.json").is_file()  # Missing datapackage schema for db source
+                    or any(Path(pth).iterdir()) is False  # Empty directory
+                    or (pth.name != "documents" and not db_path.is_file())  # Missing db for db source
+                ):
                 gui.print_msg("'" + str(source) + "' is not a valid source. Aborted.", exit=True)
 
             if pth.name == "documents":
                 for files_pth in pth.iterdir():
-                    if (files_pth.is_dir() and any(files_pth.iterdir()) is True) or files_pth.suffix[
-                        1:
-                    ].lower() == "tar":
+                    if (files_pth.is_dir()
+                            and any(files_pth.iterdir()) is True) or files_pth.suffix[1:].lower() == "tar":
                         sources[files_pth] = "dir" if files_pth.suffix == "" else files_pth.suffix[1:]
             else:
                 sources[db_path] = db_path.suffix[1:]
@@ -99,20 +92,23 @@ def get_archive_cfg(source, main_cfg):
 
         main_cfg_values[key] = value
 
-    cfg = config.Archive(
-        **main_cfg_values, source=source, target=target, config_db=config_db, tmp_dir=tmp_dir, schema_path=schema_path
-    )
+    cfg = config.Archive(**main_cfg_values,
+                         source=source,
+                         target=target,
+                         config_db=config_db,
+                         tmp_dir=tmp_dir,
+                         schema_path=schema_path)
 
     return cfg
 
 
 def export_file_column(dbo, table, file_column, cfg):
-    documents_dir = Path(source.parent, "documents")
+    documents_dir = Path(cfg.source.parent, "documents")
     documents_dir.mkdir(parents=True, exist_ok=True)
     data = dbo.query("SELECT rowid, " + file_column + " FROM " + table.name)
 
     for rowid, lob in data:
-        file_path = Path(documents_dir, table.name + "_" + file_colum + rowid + ".data")
+        file_path = Path(documents_dir, table.name + "_" + file_column + rowid + ".data")
         with open(file_path, "wb") as f:
             f.write(lob)
 
@@ -143,7 +139,7 @@ def validate_tables(deps_list, table_deps, archived_tables, cfg):
     if len(deps_list) == 0 or all(item in validated_tables for item in deps_list):
         return 0, validated_tables, deps_list
 
-    gui.print_msg("Validating dependent tables againsts datapackage schema...", style="bold cyan")
+    gui.print_msg("Validating dependent tables againsts datapackage schema...", style=gui.style.info)
 
     schema_path = Path(cfg.source.parent, "partial_datapackage.json")
     if validate(dp.create_schema(cfg, True, tables=deps_list, schema_path=schema_path)).valid is False:
@@ -203,14 +199,12 @@ def ensure_config_db(db_path, schema_path):
             norm_pk_list = row["source_pk"].split(",")
             source_pk_list = []
             for norm_key in norm_pk_list:
-                source_key = config_db.execute(
-                    f"""
+                source_key = config_db.execute(f"""
                     SELECT source_column
                     FROM columns
                     WHERE source_table = '{row["source_name"]}'
                     AND   norm_column = '{norm_key}'
-                    """
-                ).fetchone()[0]
+                    """).fetchone()[0]
                 source_pk_list.append(source_key)
 
             config_db["tables"].update(row["source_name"], {"source_pk": ",".join(source_pk_list)})
@@ -221,7 +215,7 @@ def ensure_config_db(db_path, schema_path):
 def archive_db(source, main_cfg):
     cfg = get_archive_cfg(source, main_cfg)
 
-    gui.print_msg("Exporting '" + cfg.source.name + "' to tsv-files:", style="cyan")
+    gui.print_msg("Exporting '" + cfg.source.name + "' to tsv-files:", style=gui.style.info)
 
     changed = False
     data_dir = Path(cfg.source.parent, "data")
@@ -242,7 +236,7 @@ def archive_db(source, main_cfg):
                 if tsv_path.stat().st_size == 0:
                     tsv_path.unlink()
                 else:
-                    gui.print_msg("'" + table.path + "' already exported.", style="cyan", highlight=True)
+                    gui.print_msg("'" + table.path + "' already exported.", style=gui.style.info, highlight=True)
                     archived_tables.append(table.custom["db_table_name"])
                     continue
             else:
@@ -251,7 +245,7 @@ def archive_db(source, main_cfg):
 
             gui.print_msg(
                 "Writing '" + table.path + "' (" + table.custom["count_of_rows"] + " rows)...",
-                style="cyan",
+                style=gui.style.info,
                 highlight=True,
             )
 
@@ -265,12 +259,12 @@ def archive_db(source, main_cfg):
                 if "maxLength" in field.constraints.keys():
                     max_length = field.constraints["maxLength"]
 
-                if jdbc_db_type in [-4, -3, -2, 2004] or (
-                    jdbc_db_type in [-16, -1, 2005, 2009, 2011] and max_length > 4000
-                ):  # Check for blobs and big clobs that should be exported as separate files
-                    text_columns[field.name] = (
-                        "(SELECT " + table.name + "_" + field.name + " || rowid || .data AS " + field.name + ")"
-                    )
+                if jdbc_db_type in [
+                        -4, -3, -2, 2004
+                ] or (jdbc_db_type in [-16, -1, 2005, 2009, 2011]
+                      and max_length > 4000):  # Check for blobs and big clobs that should be exported as separate files
+                    text_columns[field.name] = ("(SELECT " + table.name + "_" + field.name + " || rowid || .data AS " +
+                                                field.name + ")")
                     file_columns.append(field.name)
                 else:
                     text_columns[field.name] = field.name
@@ -278,7 +272,7 @@ def archive_db(source, main_cfg):
             fix_table(dbo, table, text_columns, cfg)
             result = sqlwb.export_text_columns(dbo, table, text_columns, tsv_path, cfg)
             if row_count_check(tsv_path, table) is False or result == "Error":
-                gui.print_msg("Wrong row count! Re-exporting with alternate method...", style="cyan")
+                gui.print_msg("Wrong row count! Re-exporting with alternate method...", style=gui.style.info)
                 if tsv_path.is_file():
                     tsv_path.unlink()
 
@@ -299,29 +293,17 @@ def archive_db(source, main_cfg):
             validate_tables(deps_list, table_deps, archived_tables, cfg)
 
     if changed:
-        gui.print_msg("Datapackage validated!", style="bold green")
+        gui.print_msg("Datapackage validated!", style=gui.style.ok)
     else:
-        gui.print_msg("Datapackage already validated.", style="cyan")
+        gui.print_msg("Datapackage already validated.", style=gui.style.info)
 
 
 def fix_table(dbo, table, text_columns, cfg):
     print("Removing any null bytes before exporting data...")
     for text_column in text_columns.keys():
-        sql = (
-            "UPDATE "
-            + table.name
-            + " SET "
-            + text_column
-            + " = substr("
-            + text_column
-            + ",1,instr ("
-            + text_column
-            + ",CHAR(0)) - 1) || substr(CAST("
-            + text_column
-            + " AS BLOB),instr ("
-            + text_column
-            + ",CHAR(0)) + 1)"
-        )
+        sql = ("UPDATE " + table.name + " SET " + text_column + " = substr(" + text_column + ",1,instr (" +
+               text_column + ",CHAR(0)) - 1) || substr(CAST(" + text_column + " AS BLOB),instr (" + text_column +
+               ",CHAR(0)) + 1)")
 
         dbo.execute(sql)
         dbo.commit()
@@ -353,7 +335,7 @@ def archive_dir(source, cfg):
 
 
 def archive_tar(source, cfg):
-    gui.print_msg("Checking '" + source.name + "' for modified content...", style="bold cyan")
+    gui.print_msg("Checking '" + source.name + "' for modified content...", style=gui.style.info)
 
     state = 0  # Untracked, modified unknown
     config_db = configdb.create_db(Path(cfg.tmp_dir, "documents-config.db"))
@@ -372,7 +354,7 @@ def archive_tar(source, cfg):
             break
 
     if state == 0:
-        gui.print_msg("Untracked file! Generating checksum for future reference...", style="red")
+        gui.print_msg("Untracked file! Generating checksum for future reference...", style=gui.style.warning)
         cfg.config_db["files"].insert(
             {
                 "source_path": source,
@@ -384,7 +366,7 @@ def archive_tar(source, cfg):
             pk="source_path",
         )
     elif state in [1, 2]:
-        gui.print_msg("File verified!", style="green")
+        gui.print_msg("File verified!", style=gui.style.ok)
     elif state == 3:
         ok = Confirm.ask("File has been modified on disk! Proceed?")
         if not ok:

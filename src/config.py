@@ -98,23 +98,16 @@ def load(cfg_file):
     except PermissionError:
         pass
     except yaml.YAMLError as pe:
-        gui.print_msg(f"""ERROR: Cannot parse the configuration file: {pe}""",
-                      exit=True)
+        gui.print_msg(f"""ERROR: Cannot parse the configuration file: {pe}""", exit=True)
 
     jdbc_drivers = dict()
     for jdbc_type, cfg in configuration.get("drivers", {}).items():
         if "jar" not in cfg:
-            gui.print_msg(
-                f"""ERROR in definition of driver type {jdbc_type}: jar file not specified.""",
-                exit=True)
+            gui.print_msg(f"""ERROR in definition of driver type {jdbc_type}: jar file not specified.""", exit=True)
         elif "class" not in cfg:
-            gui.print_msg(
-                f"""ERROR in definition of driver type {jdbc_type}: driver class not specified.""",
-                exit=True)
+            gui.print_msg(f"""ERROR in definition of driver type {jdbc_type}: driver class not specified.""", exit=True)
         elif "url" not in cfg:
-            gui.print_msg(
-                f"""ERROR in definition of driver type {jdbc_type}: url not specified.""",
-                exit=True)
+            gui.print_msg(f"""ERROR in definition of driver type {jdbc_type}: url not specified.""", exit=True)
 
         jdbc_drivers[jdbc_type] = cfg
 

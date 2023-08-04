@@ -53,6 +53,10 @@ def get_args(argv):
     if len(argv) == 1 or (len(argv) == 2 and any(x in ["copy", "archive", "script", "edit"] for x in argv)):
         argv.append("--help")
 
+    RawTextRichHelpFormatter.styles["argparse.prog"] = gui.style.warning
+    RawTextRichHelpFormatter.styles["argparse.groups"] = gui.style.info
+    RawTextRichHelpFormatter.styles["argparse.args"] = gui.style.ok
+
     common_parser = ArgumentParser("common", add_help=False)
 
     if argv[1] in ["copy"]:

@@ -25,7 +25,7 @@ from sqlite_utils import Database
 
 
 def find_dupes(field, db):
-    gui.print_msg(f"Finding {field} dupes...", style="bold cyan")
+    gui.print_msg(f"Finding {field} dupes...", style=gui.style.info)
     for row in db.query(
         f"""
         WITH bat_mod AS
@@ -61,7 +61,7 @@ def run(main_cfg):
     """
 
     # COPY DATA:
-    gui.print_msg("Importing data from files...", style="bold cyan")
+    gui.print_msg("Importing data from files...", style=gui.style.info)
     main_cfg.source = "/home/pwb/Downloads/bataljonen/data"
     main_cfg.target = "bataljonen"
     cfg = _copy.run(main_cfg)
@@ -72,7 +72,7 @@ def run(main_cfg):
     #sys.exit()
 
     # TRANSFORM DATA:
-    gui.print_msg("Transforming data...", style="bold cyan")
+    gui.print_msg("Transforming data...", style=gui.style.info)
     db = Database(cfg.target_db_path, use_counts_table=True)
 
     db["users"].create(
@@ -195,7 +195,7 @@ def run(main_cfg):
     )
 
     # CALCULATE:
-    gui.print_msg("Calculating consecutive years...", style="bold cyan")
+    gui.print_msg("Calculating consecutive years...", style=gui.style.info)
     year = 2022
     years = [str(i) for i in list(range(year, year - 21, -1))]  # 2022 -> 2002
     for row in db["bataljonen"].rows:
@@ -212,7 +212,7 @@ def run(main_cfg):
     for field in ["user_email", "display_name", "first_last_name"]:
         find_dupes(field, db)
 
-    gui.print_msg(f"Finding email dupes in interesse table...", style="bold cyan")
+    gui.print_msg(f"Finding email dupes in interesse table...", style=gui.style.info)
     for row in db.query(
         f"""
         SELECT b.email,
@@ -226,7 +226,7 @@ def run(main_cfg):
     ):
         db["interesse"].update(row["id"], {"duplicates": row["number"]})
 
-    gui.print_msg(f"Finding requests with active membership(1) and partoukort(2) ...", style="bold cyan")
+    gui.print_msg(f"Finding requests with active membership(1) and partoukort(2) ...", style=gui.style.info)
     for row in db.query(
         f"""
         WITH interesse_mod AS
@@ -248,11 +248,11 @@ def run(main_cfg):
 
     # EXPORT DATA:
     file_path = Path(Path.home(), "bataljonen.xlsx")
-    gui.print_msg("Exporting data to '" + file_path.name + "' in home directory...", style="cyan", highlight=True)
+    gui.print_msg("Exporting data to '" + file_path.name + "' in home directory...", style=gui.style.info, highlight=True)
     _sqlite.export_xlsx(file_path, "SELECT * FROM bataljonen ORDER BY consecutive_years DESC", cfg)
 
     file_path = Path(Path.home(), "interesse.xlsx")
-    gui.print_msg("Exporting data to '" + file_path.name + "' in home directory...", style="cyan", highlight=True)
+    gui.print_msg("Exporting data to '" + file_path.name + "' in home directory...", style=gui.style.info, highlight=True)
     _sqlite.export_xlsx(
         file_path, "SELECT first_name, last_name, email, phone, user_id, active_member, duplicates FROM interesse", cfg
     )
@@ -272,5 +272,5 @@ def run(main_cfg):
     ORDER BY consecutive_years DESC;
     """
     file_path = Path(Path.home(), "ansiennitet_interesse1.xlsx")
-    gui.print_msg("Exporting data to '" + file_path.name + "' in home directory...", style="cyan", highlight=True)
+    gui.print_msg("Exporting data to '" + file_path.name + "' in home directory...", style=gui.style.info, highlight=True)
     _sqlite.export_xlsx(file_path, sql, cfg)

@@ -164,14 +164,14 @@ def create_schema(cfg, changed, tables=[], schema_path=None):
     }
 
     if schema_path.is_file() and cfg.stop != "json" and not changed and len(tables) == 0:
-        gui.print_msg("Datapackage.json already generated.", style="bold cyan")
+        gui.print_msg("Datapackage.json already generated.", style=gui.style.info)
         return schema_path
 
     if schema_path.is_file():
         schema_path.unlink()
 
     if len(tables) == 0:
-        gui.print_msg("Generating datapackage.json...", style="bold cyan")
+        gui.print_msg("Generating datapackage.json...", style=gui.style.info)
 
     package = Package(
         name=target_name,
@@ -312,7 +312,7 @@ def create_ddl(schema_path, changed, args):
 
     for fil in files:
         if fil.is_file() and args.stop != "ddl" and not changed:
-            gui.print_msg("DDL for schema already generated.", style="bold cyan")
+            gui.print_msg("DDL for schema already generated.", style=gui.style.info)
         else:
             if not schema_path.is_file():
                 gui.print_msg("JSON schema-file '" + str(schema_path) + "' missing. Aborted", exit=True)
@@ -320,7 +320,7 @@ def create_ddl(schema_path, changed, args):
             def _dump(sql, *multiparams, **params):
                 pass
 
-            gui.print_msg("Generating DDL from datapackage json schema...", style="bold cyan")
+            gui.print_msg("Generating DDL from datapackage json schema...", style=gui.style.info)
 
             if jdbc.type == "h2":
                 jdbc.type = "postgresql"

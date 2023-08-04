@@ -126,7 +126,7 @@ def create_db(path):
 
 
 def update_table_deps(tables, cfg):
-    gui.print_msg("Get dependencies per table...", style="bold cyan")
+    gui.print_msg("Get dependencies per table...", style=gui.style.info)
 
     deps_dict = {}
     for table in tables:

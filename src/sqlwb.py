@@ -35,12 +35,12 @@ def get_copy_statements(json_schema_file, cfg, diff_data):
 
     copy_file = Path(cfg.tmp_dir, cfg.target_name + "-copy.sql")
     if copy_file.is_file() and cfg.stop != "copy" and not diff_data:
-        gui.print_msg("Copy statements already generated.", style="bold cyan")
+        gui.print_msg("Copy statements already generated.", style=gui.style.info)
     else:
         if not json_schema_file.is_file():
             gui.print_msg("Datapackage json schema '" + str(json_schema_file) + "' missing. Aborted", exit=True)
 
-        gui.print_msg("Generating copy data statements...", style="bold cyan")
+        gui.print_msg("Generating copy data statements...", style=gui.style.info)
 
         if copy_file.is_file():
             copy_file.unlink()
@@ -207,7 +207,7 @@ def run_ddl_file(jdbc, cfg, diff_tables, ddl_file, echo=False):
     if not ddl_file.is_file():
         gui.print_msg("SQL file '" + str(ddl_file) + "' missing. Aborted", exit=True)
 
-    gui.print_msg("Creating tables from generated DDL...", style="bold cyan")
+    gui.print_msg("Creating tables from generated DDL...", style=gui.style.info)
 
     result = None
     norm_tables = configdb.get_norm_tables(cfg.config_db)
@@ -226,7 +226,7 @@ def run_ddl_file(jdbc, cfg, diff_tables, ddl_file, echo=False):
                     with open(Path(td, norm_table + "_ddl.sql"), "w") as fw:
                         fw.write(tbl_ddl)
 
-                    gui.print_msg("Creating table '" + source_table + "':", style="cyan",highlight=True)
+                    gui.print_msg("Creating table '" + source_table + "':", style=gui.style.info,highlight=True)
 
                     result = str(
                         batch.runScript(
@@ -283,7 +283,7 @@ def sqlwb_truncate_table(target_table, source_table, cfg):
 
     gui.print_msg(
         "Test run. Deleting copied table '" + source_table + "' and referring tables:",
-        style="cyan",
+        style=gui.style.info,
         highlight=True,
     )
 
@@ -328,7 +328,7 @@ def run_copy_file(cfg, copy_file, diff_data):
     with open(copy_file) as file:
         statements = [l for l in file.read().splitlines() if l.strip()]
 
-    gui.print_msg("Copying tables from source to target database:\n", style="bold cyan")
+    gui.print_msg("Copying tables from source to target database:\n", style=gui.style.info)
 
     imported_tables = []
     error_tables = []
@@ -342,12 +342,12 @@ def run_copy_file(cfg, copy_file, diff_data):
         cp_result = ""
         if source_table not in diff_data:
             imported_tables.append(source_table)
-            gui.print_msg("'" + source_table + "' already copied.", style="cyan", highlight=True)
+            gui.print_msg("'" + source_table + "' already copied.", style=gui.style.info, highlight=True)
 
         elif not cfg.test or (cfg.test and old_error_tables and source_table in old_error_tables):
             gui.print_msg(
                 "Copying " + str(source_row_count) + " rows from '" + source_table + "':",
-                style="cyan",
+                style=gui.style.info,
                 highlight=True,
             )
 
@@ -389,7 +389,7 @@ def run_copy_file(cfg, copy_file, diff_data):
 
             else:
                 gui.print_msg(
-                    "'" + source_table + "' copied/deleted in previous test run.", style="cyan", highlight=True
+                    "'" + source_table + "' copied/deleted in previous test run.", style=gui.style.info, highlight=True
                 )
 
     if error_tables:

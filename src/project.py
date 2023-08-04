@@ -74,7 +74,7 @@ def confirm(cfg):
         ):
             continue
 
-        gui.print_msg(str(key) + ": " + str(value), style="bold cyan", highlight=True)
+        gui.print_msg(str(key) + ": " + str(value), style=gui.style.info, highlight=True)
 
     print()
     msg = "Check arguments! Continue?"

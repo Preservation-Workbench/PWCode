@@ -21,15 +21,12 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-
-import sys
-import os
-
 import petl as etl
 import gui
 import configdb
 from sqlite_utils import Database
 from functools import reduce
+import jdbc
 
 
 def fix_fk(cfg):
@@ -40,17 +37,15 @@ def fix_fk(cfg):
 
     norm_tables = configdb.get_norm_tables(cfg.config_db)
     norm_columns = configdb.get_norm_columns(cfg.config_db)
-    for row in cfg.config_db.query(
-        f"""
-        SELECT source_name,
-               source_table,
-               source_ref_table,
-               source_column,
-               source_ref_column
-        FROM foreign_keys
-        WHERE IFNULL(target_name,'') = ''
-        """
-    ):
+    for row in cfg.config_db.query("""
+            SELECT source_name,
+                   source_table,
+                   source_ref_table,
+                   source_column,
+                   source_ref_column
+            FROM foreign_keys
+            WHERE IFNULL(target_name,'') = ''
+            """):
         if all(x in norm_tables for x in [row["source_table"], row["source_ref_table"]]):
             fixed = True
             source_table = row["source_table"]
@@ -61,35 +56,16 @@ def fix_fk(cfg):
             norm_ref_column = norm_columns[source_ref_table + ":" + row["source_ref_column"]]
 
             gui.print_msg(
-                "Adding foreign key to table "
-                + norm_table
-                + " ("
-                + norm_column
-                + " references "
-                + norm_ref_table
-                + "."
-                + norm_ref_column
-                + ")",
-                style="bold cyan",
+                "Adding foreign key to table " + norm_table + " (" + norm_column + " references " + norm_ref_table +
+                "." + norm_ref_column + ")",
+                style=gui.style.info,
             )
 
             if cfg.target.type == "sqlite":
                 db[norm_table].add_foreign_key(norm_column, norm_ref_table, norm_ref_column, ignore=True)
             else:
-                sql = (
-                    '\nALTER TABLE "'
-                    + norm_table
-                    + '"'
-                    + ' ADD CONSTRAINT "'
-                    + str(row["source_name"])
-                    + '" FOREIGN KEY ('
-                    + norm_column
-                    + ") "
-                    + norm_ref_table
-                    + " ("
-                    + norm_ref_column
-                    + ");"
-                )
+                sql = ('\nALTER TABLE "' + norm_table + '"' + ' ADD CONSTRAINT "' + str(row["source_name"]) +
+                       '" FOREIGN KEY (' + norm_column + ") " + norm_ref_table + " (" + norm_ref_column + ");")
 
                 result = jdbc.run_command(cfg.target, sql, cfg)
                 print(result)

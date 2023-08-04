@@ -9,7 +9,6 @@ rich-argparse
 cchardet
 openpyxl
 sqlalchemy==1.4.32
-black
 command_runner==1.4.0
 pathvalidate
 jpype1==1.4.0
@@ -23,3 +22,4 @@ cryptography>=36.0.0
 install-jdk
 maven-artifact
 dulwich
+yapf

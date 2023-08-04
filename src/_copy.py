@@ -54,7 +54,7 @@ def write_tables_file(table_file, cfg):
             tables.append(table)
             fil.write(table + "\n")
 
-    gui.print_msg("List of tables written to '" + str(table_file) + "'", style="bold green")
+    gui.print_msg("List of tables written to '" + str(table_file) + "'", style=gui.style.ok)
 
     return tables
 
@@ -75,7 +75,7 @@ def get_include_tables(cfg):
         with open(table_file) as file:
             tables = [s for s in file.read().splitlines() if not s.startswith("# ")]
 
-        gui.print_msg("Export of table list to '" + str(table_file) + "' already done.", style="bold cyan")
+        gui.print_msg("Export of table list to '" + str(table_file) + "' already done.", style=gui.style.info)
 
     configdb.update_include(cfg, tables)
 
@@ -203,7 +203,7 @@ def capture_files(cfg):
                 copied = 1
 
     if copied == 1:
-        gui.print_msg("Directory '" + cfg.source + "' copied previously.", style="cyan", highlight=True)
+        gui.print_msg("Directory '" + cfg.source + "' copied previously.", style=gui.style.info, highlight=True)
         return
 
     if copied == 2:
@@ -214,7 +214,7 @@ def capture_files(cfg):
         tar_disk_path.unlink()
         cfg.config_db["files"].delete(cfg.source)
 
-    gui.print_msg("Creating tar-file from source directory...", style="bold cyan")
+    gui.print_msg("Creating tar-file from source directory...", style=gui.style.info)
 
     cfg.target_tar_path = _file.get_unique_file(Path(cfg.content_dir, Path(cfg.source).name + ".tar"))
     if os.name == "posix" and shutil.which("tar") is not None:
@@ -252,7 +252,7 @@ def run(main_cfg):
             ddl_file = dp.create_ddl(schema_file, changed, cfg)  # Generate ddl
             sqlwb.run_ddl_file(cfg.target, cfg, diff_tables, ddl_file)  # Create target schema from generated ddl
         else:
-            gui.print_msg("Target schema already created.", style="bold cyan")
+            gui.print_msg("Target schema already created.", style=gui.style.info)
 
         # CÒPY DATA TO TARGET:
         diff_data = configdb.data_diff(cfg)  # Compare source and target data
@@ -260,7 +260,7 @@ def run(main_cfg):
             copy_file = sqlwb.get_copy_statements(schema_file, cfg, diff_data)  # Generate copy data statements
             sqlwb.run_copy_file(cfg, copy_file, diff_data)  # Copy data to target schema with copy data statements
         else:
-            gui.print_msg("All data copied previously.", style="bold cyan")
+            gui.print_msg("All data copied previously.", style=gui.style.info)
 
         # VERIFY COPIED DATA:
         if diff_data:
@@ -270,8 +270,8 @@ def run(main_cfg):
                 gui.print_msg("Something went wrong. Missing data in target!", exit=True)
 
             if cfg.test:
-                gui.print_msg("Test run completed!", style="bold green")
+                gui.print_msg("Test run completed!", style=gui.style.ok)
             else:
-                gui.print_msg("All data copied successfully!", style="bold green")
+                gui.print_msg("All data copied successfully!", style=gui.style.ok)
 
     return cfg

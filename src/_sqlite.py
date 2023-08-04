@@ -56,7 +56,7 @@ def import_excel(fil, index, conn, args):
                 continue  # Ignore empty sheets
 
         table_name = db.normalize_name(ws_name, index, length=True)
-        gui.print_msg("Creating and populating table '" + table_name + "'", style="cyan", highlight=True)
+        gui.print_msg("Creating and populating table '" + table_name + "'", style=gui.style.info, highlight=True)
         table = etl.io.xlsx.fromxlsx(fil, sheet=ws_name, read_only=True)
         etl.todb(table, conn, table_name, create=True, constraints=False)
 
@@ -77,7 +77,7 @@ def import_ods(fil, index, conn, args):
     Convert ods files to xlsx before importing because existing python ods readers are much too slow.
     """
     cmd = f"soffice --headless --convert-to xlsx {str(fil)} --outdir {str(args.tmp_dir)}"
-    gui.print_msg("Converting '" + fil.name + "' to Excel format.", style="cyan", highlight=True)
+    gui.print_msg("Converting '" + fil.name + "' to Excel format.", style=gui.style.info, highlight=True)
     exit_code, output = command_runner(cmd, timeout=180, encoding="utf-8")
     if exit_code == 0:
         import_excel(Path(args.tmp_dir, fil.with_suffix(".xlsx").name), index, conn, args)
@@ -90,7 +90,7 @@ def import_files(args):
     Import supported tabular files in source directory in sqlite database.
     """
     conn = sqlite3.connect(args.source_db_path)
-    gui.print_msg("Creating sqlite database from files in directory...", style="bold cyan")
+    gui.print_msg("Creating sqlite database from files in directory...", style=gui.style.info)
     ext_funcs = ext_cmds()
 
     for index, fil in enumerate(args.data_files_dir.rglob("*")):
