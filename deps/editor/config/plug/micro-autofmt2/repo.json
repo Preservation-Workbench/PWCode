@@ -1,0 +1,14 @@
+[{
+  "Name": "autofmt",
+  "Description": "plugin to run formatters on save",
+  "Tags": ["formatter"],
+  "Versions": [
+    {
+      "Version": "2.0.0",
+      "Url": "https://github.com/zongou/micro-autofmt/archive/2.0.0.zip",
+      "Require": {
+        "micro": ">=2.0.8"
+      }
+    }
+  ]
+}]
