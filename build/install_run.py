@@ -20,6 +20,21 @@ import site
 import shutil
 import subprocess
 from pathlib import Path
+from dataclasses import dataclass
+
+
+# TODO: Get values for config file!
+# TODO: Install https://github.com/mvdan/sh/releases
+@dataclass()
+class Config:
+    base_dir: Path = Path(os.environ["PYAPP"]).parent.absolute()
+    tmp_dir: Path = Path(base_dir, "projects", "tmp")
+    edit_url: str = "https://github.com/zyedidia/micro/releases/download/v2.0.11/micro-2.0.11-linux64.tar.gz"
+
+    def __post_init__(self):
+        if os.name != "posix":
+            self.edit_url: str = "https://github.com/zyedidia/micro/releases/download/v2.0.11/micro-2.0.11-win64.zip"
+
 
 # BASE PATHS:
 base_dir = Path(os.environ["PYAPP"]).parent.absolute()
@@ -44,6 +59,8 @@ if len(os.listdir(deps_python_dir)) == 1:
         print(result)
         sys.exit()
 
+# TODO: Alt under her i separat script mulig?
+
 # JDK:
 import jdk
 
@@ -59,7 +76,6 @@ if not deps_java_dir.is_dir():
 
     print("Optimizing java jdk...")
 
-    min = a if a < b else b
     jlink = Path(jdk_tmp_dir, "bin", "jlink.exe") if jdk.OS == "windows" else Path(jdk_tmp_dir, "bin", "jlink")
 
     modules = [

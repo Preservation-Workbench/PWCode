@@ -19,7 +19,6 @@ import subprocess
 from pathlib import Path
 
 from rich.console import Console
-from rich.pretty import pprint as richprint
 from dataclasses import dataclass
 import pprint
 
@@ -71,4 +70,3 @@ def show(cfg, obj, exit=True, error=False):
             print_msg("Exit and open error message.", style=style.warning, exit=exit)
         else:
             print_msg("Stopped for manual editing of '" + str(obj) + "'.", style=style.info, exit=exit)
-

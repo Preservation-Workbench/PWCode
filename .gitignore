@@ -3,7 +3,7 @@ __pycache__/
 *.py[co]
 config.yml
 config.yml.save
-pwx
+pwcode
 build/release/*
 deps/editor/*
 deps/editor/config/backups/*
