@@ -13,12 +13,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import os
 import sys
 from pathlib import Path
 import shutil
 from argparse import ArgumentParser, SUPPRESS
-from dataclasses import dataclass
 
 from rich.traceback import install
 from rich_argparse import RawTextRichHelpFormatter
@@ -29,7 +27,6 @@ import _copy
 import _archive
 import _script
 import _edit
-
 
 # def get_log_file(args):
 # args.log_dir = Path(args.tmp_dir, "logs")
@@ -66,9 +63,8 @@ def get_args(argv):
             dest="stop",
             metavar="FILE",
             choices=files,
-            help="Stop after generating <"
-            + ",".join(files)
-            + ">-file and open for editing (triggers regeneration if rerun).",
+            help="Stop after generating <" + ",".join(files) +
+            ">-file and open for editing (triggers regeneration if rerun).",
         )
         common_parser.add_argument("--debug", dest="debug", action="store_true", help="Show debug messages.")
         common_parser.add_argument(
@@ -113,26 +109,26 @@ def get_args(argv):
         "copy",
         add_help=False,
         description="Copy database data.",
-        epilog="".join(
-            (
-                "Files:\n",
-                "  config: Config file for connctions/aliases, database drivers etc.\n",
-                "  tables: List of tables to export or copy.\n",
-                "  json:   JSON schema of data package with tables in dependency order.\n",
-                "  ddl:    SQL code generated from JSON schema to recreate source schema.\n",
-                "  copy:   Generated statements for copying data from source to target.\n",
-                "\nExample of usage:\n",
-                '  pwetl copy --source "jdbc:sqlite:/home/pwb/source.db" --target "jdbc:sqlite:/home/pwb/target.db"\n',
-            )
-        ),
+        epilog="".join((
+            "Files:\n",
+            "  config: Config file for connctions/aliases, database drivers etc.\n",
+            "  tables: List of tables to export or copy.\n",
+            "  json:   JSON schema of data package with tables in dependency order.\n",
+            "  ddl:    SQL code generated from JSON schema to recreate source schema.\n",
+            "  copy:   Generated statements for copying data from source to target.\n",
+            "\nExample of usage:\n",
+            '  pwetl copy --source "jdbc:sqlite:/home/pwb/source.db" --target "jdbc:sqlite:/home/pwb/target.db"\n',
+        )),
         formatter_class=RawTextRichHelpFormatter,
         parents=[common_parser],
     )
     if argv[1] == "copy":
         copy_arguments = copy_parser.add_argument_group("Arguments")
-        copy_arguments.add_argument(
-            "--source", dest="source", type=str, required=True, help="Database jdbc url/alias or directory."
-        )
+        copy_arguments.add_argument("--source",
+                                    dest="source",
+                                    type=str,
+                                    required=True,
+                                    help="Database jdbc url/alias or directory.")
         copy_arguments.add_argument(
             "--target",
             dest="target",
@@ -153,9 +149,11 @@ def get_args(argv):
     )
 
     archive_arguments = archive_parser.add_argument_group("Arguments")
-    archive_arguments.add_argument(
-        "--source", dest="source", type=str, required=True, help="SIP directory path or project name."
-    )
+    archive_arguments.add_argument("--source",
+                                   dest="source",
+                                   type=str,
+                                   required=True,
+                                   help="SIP directory path or project name.")
     archive_parser._optionals.title = "Optional"
     archive_parser._action_groups.reverse()
 
@@ -163,7 +161,7 @@ def get_args(argv):
     config_parser = subparsers.add_parser(
         "configure",
         add_help=False,
-        description="".join(("Configure program by editing config.yml.",)),
+        description="".join(("Configure program by editing config.yml.", )),
         formatter_class=RawTextRichHelpFormatter,
         parents=[common_parser],
     )
@@ -183,7 +181,7 @@ def get_args(argv):
     edit_parser = subparsers.add_parser(
         "edit",
         add_help=False,
-        description="".join(("Edit a file.",)),
+        description="".join(("Edit a file.", )),
         formatter_class=RawTextRichHelpFormatter,
         parents=[common_parser],
     )
@@ -215,7 +213,7 @@ def get_args(argv):
 
 
 # --> ikke ta vare på gamle filer->de skal inn i subversion som første commit før konvertering heller
-# --> Filbaner i {schema1}-documents.db og documents.db må være relative ift hvor databasene er selv -> er det i PWConvert?
+# --> Filbaner i {schema1}-documents.db og documents.db må være relative ift hvor db'ene er selv -> er det i PWConvert?
 # --> Må legge inn støtte for visse subversion-kommandoer
 # SIP/AIP/DIP:
 # - content.txt
@@ -257,14 +255,10 @@ def run(argv):
     install(show_locals=False)  # Better debugging
     main_cfg = get_args(argv)
 
-    #print(main_cfg.pwxtract_dir)
-    #print(main_cfg.jars_dir)
-    #sys.exit()
     _java.init_jvm(main_cfg.java_home, main_cfg.jars_dir)
 
     # args.log_file = get_log_file(args)
     # TODO: Bytt ut log-løsning i linje over. Ha mappe for log som ikke er avhengig av project?
-
 
     cmds = {
         "configure": (lambda x: gui.show(main_cfg, main_cfg.cfg_file)),

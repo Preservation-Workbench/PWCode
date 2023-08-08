@@ -25,11 +25,11 @@ import pprint
 
 @dataclass()
 class Style:
-    warning: str = "#ED8796"
+    warning: str = "#ED8796"  # rgb(237, 135, 150)
     warning_bold: str = "bold #ED8796"
-    ok: str = "#A6DA95"
+    ok: str = "#A6DA95"  # rgb(166, 218, 149)
     ok_bold: str = "bold #A6DA95"
-    info: str = "#8AADF4"
+    info: str = "#8AADF4"  # rgb(138, 173, 244)
     info_bold: str = "bold #8AADF4"
 
 
@@ -61,8 +61,14 @@ def show(cfg, obj, exit=True, error=False):
         obj = stdout_file
 
     env = os.environ.copy()
-    env["PATH"] = str(Path(cfg.pwxtract_dir, "deps", "python", "bin")) + os.pathsep + env["PATH"]
     env["PYTHONPATH"] = str(Path(cfg.pwxtract_dir, "deps", "python"))
+    paths = [
+        str(Path(cfg.pwxtract_dir, "deps", "python", "bin")),
+        str(Path(cfg.pwxtract_dir, "deps", "editor", "deps"))
+    ]
+    for path in paths:
+        env["PATH"] = path + os.pathsep + env["PATH"]
+
     subprocess.call([cfg.editor, "--config-dir", Path(cfg.editor.parent, "config"), obj], env=env)
 
     if exit:
