@@ -148,7 +148,7 @@ def get_args(argv):
         parents=[common_parser],
     )
 
-    archive_arguments = archive_parser.add_argument_group("Arguments")
+    archive_arguments = archive_parser.add_argument_group("archive")
     archive_arguments.add_argument("--source",
                                    dest="source",
                                    type=str,
@@ -158,7 +158,7 @@ def get_args(argv):
     archive_parser._action_groups.reverse()
 
     # Configure:
-    config_parser = subparsers.add_parser(
+    subparsers.add_parser(
         "configure",
         add_help=False,
         description="".join(("Configure program by editing config.yml.", )),
@@ -174,7 +174,7 @@ def get_args(argv):
         formatter_class=RawTextRichHelpFormatter,
         parents=[common_parser],
     )
-    script_arguments = script_parser.add_argument_group("Script")
+    script_arguments = script_parser.add_argument_group("script")
     script_arguments.add_argument("--path", dest="path", type=str, required=True, help="Path to custom script.")
 
     # Edit:

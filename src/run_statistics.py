@@ -14,7 +14,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 import os
 import psutil
 
@@ -60,6 +59,7 @@ def timedelta_to_string(dt: timedelta) -> str:
 
 
 class Statistics:
+
     def __init__(self):
         self.start_time = datetime.now()
         self.query_time = 0.0
@@ -100,15 +100,15 @@ class Statistics:
         return time_to_string(self.query_time)
 
     def get_statistics(self, tag: str = "") -> str:
-        return "+ {:<9}   {:<11},  nq = {:8d}, rc = {:8d}".format(
-            "db " + tag + ":", self.get_query_time(), self.exec_count, self.row_count
-        )
+        return "+ {:<9}   {:<11},  nq = {:8d}, rc = {:8d}".format("db " + tag + ":", self.get_query_time(),
+                                                                  self.exec_count, self.row_count)
 
 
 GLOBAL_STATISTICS = Statistics()
 
 
 class RunStatistics(Statistics):
+
     def __init__(self):
         super(RunStatistics, self).__init__()
         self.t0 = 0.0

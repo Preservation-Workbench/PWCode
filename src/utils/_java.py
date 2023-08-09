@@ -30,6 +30,6 @@ def init_jvm(java_home, jars_dir):
     jar_files = []
     for f in os.listdir(jars_dir):
         if f.endswith('.jar'):
-            jar_files.append(str(Path(jars_dir,f)))
+            jar_files.append(str(Path(jars_dir, f)))
 
     jp.startJVM(str(jvm_path), "-Djava.class.path={}".format(':'.join(jar_files)))

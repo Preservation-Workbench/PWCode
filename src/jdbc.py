@@ -18,10 +18,12 @@
 import sys
 import contextlib
 from io import StringIO
-from pathlib import Path
-from typing import List
 from collections import OrderedDict
 from decimal import Decimal
+from functools import reduce
+from dateutil.parser import parse as dt_parse
+import datetime
+import re
 
 import configdb
 from sqlite_utils import Database
@@ -48,6 +50,11 @@ DEC_ZERO = Decimal(0.0)
 
 JAVA_STRING = None
 
+# regex filters
+RE_IS_NUMBER = re.compile(r'^\d+(\.\d*)*$')
+RE_IS_DATE_TIME = re.compile(r'^\d{4}(-\d{2}){2}[T ]\d{2}(:\d{2}){2}(\.\d+)?(Z|[+\- ]\d{2}(:)?\d{2})?$')
+RE_IS_DATE = re.compile(r'^\d{4}(-\d{2}){2}$')
+
 
 def verified_boolean(value) -> bool:
     """
@@ -73,6 +80,7 @@ def default_cursor(default_result):
     """
 
     def wrap(func):
+
         def func_wrapper(*args, **kwargs):
             if len(args) < 1:
                 raise LookupError("Illegal function for default_cursor decorator")
@@ -152,20 +160,18 @@ class Dbo:
             self.password = re.split("\\b&password=\\b", login)[-1].partition("&")[0]
             self.user = re.split("\\b&user=\\b", login)[-1].partition("&")[0]
             self.url = login
-            self.short_url = reduce(
-                lambda a, kv: a.replace(*kv), (("&password=" + self.password, ""), ("&user=" + self.user, "")), login
-            )
+            self.short_url = reduce(lambda a, kv: a.replace(*kv),
+                                    (("&password=" + self.password, ""), ("&user=" + self.user, "")), login)
             self.schema = re.split("\\b&currentSchema=\\b", login)[-1].partition("&")[0]
             self.credentials = None
             self.always_escape = False
         elif self.login.startswith("jdbc:oracle:thin:") and ("oracle" in cfg.jdbc_drivers):
             self.type = "oracle"
             schema = re.split("\\bjdbc:oracle:thin:\\b", login)[-1].partition("/")[0]
-            self.password = re.split("\\bjdbc:oracle:thin:" + schema + "/\\b", login)[-1][
-                : login.rfind("@") - 18 - len(schema)
-            ]
-            self.url = "jdbc:oracle:thin:" + schema + '/"' + self.password + '"' + login[login.rfind("@") :]
-            self.short_url = "jdbc:oracle:thin:" + login[login.rfind("@") :]
+            self.password = re.split("\\bjdbc:oracle:thin:" + schema + "/\\b",
+                                     login)[-1][:login.rfind("@") - 18 - len(schema)]
+            self.url = "jdbc:oracle:thin:" + schema + '/"' + self.password + '"' + login[login.rfind("@"):]
+            self.short_url = "jdbc:oracle:thin:" + login[login.rfind("@"):]
             self.user = schema
             self.schema = schema.upper()
             self.credentials = None
@@ -177,15 +183,14 @@ class Dbo:
         # sys.exit()
 
         # Update path to driver to actual path (replace dummy path with actual)
-        cfg.jdbc_drivers[self.type]["jar"] = cfg.jdbc_drivers[self.type]["jar"].replace(
-            "{JARS_DIR}", str(cfg.jars_dir)
-        )
+        cfg.jdbc_drivers[self.type]["jar"] = cfg.jdbc_drivers[self.type]["jar"].replace("{JARS_DIR}", str(cfg.jars_dir))
 
         connection_error = None
         try:
-            self.connection = connect(
-                cfg.jdbc_drivers[self.type]["class"], self.url, driver_args=self.credentials, jars=cfg.jar_files
-            )
+            self.connection = connect(cfg.jdbc_drivers[self.type]["class"],
+                                      self.url,
+                                      driver_args=self.credentials,
+                                      jars=cfg.jar_files)
             self.connection.jconn.setAutoCommit(auto_commit)
         except Exception as error:
             error_msg = str(error)
@@ -300,11 +305,8 @@ class Dbo:
         error_message = None
         with self.statistics as stt:
             try:
-                if (
-                    isinstance(parameters, (list, tuple))
-                    and (len(parameters) > 0)
-                    and (isinstance(parameters[0], (list, tuple, dict)))
-                ):
+                if (isinstance(parameters, (list, tuple)) and (len(parameters) > 0)
+                        and (isinstance(parameters[0], (list, tuple, dict)))):
                     stt.add_exec_count(len(parameters))
                     cursor.executemany(sql, [string2java_string(p) for p in parameters])
                 else:
@@ -318,7 +320,7 @@ class Dbo:
                 error_message = str(execute_exception)
                 for prefix in ["java.sql."]:
                     if error_message.startswith(prefix):
-                        error_message = error_message[len(prefix) :]
+                        error_message = error_message[len(prefix):]
             if error_message is not None:
                 print(sql, file=sys.stderr)
                 if isinstance(parameters, (list, tuple)):
@@ -352,9 +354,12 @@ class Dbo:
         return get_columns_of_cursor(cursor)
 
     @default_cursor(None)
-    def get_data(
-        self, cursor: Cursor = None, return_type=tuple, include_none=False, max_rows: int = 0, array_size: int = 1000
-    ):
+    def get_data(self,
+                 cursor: Cursor = None,
+                 return_type=tuple,
+                 include_none=False,
+                 max_rows: int = 0,
+                 array_size: int = 1000):
         """
         An iterator using fetchmany to keep the memory usage reasonable
         @param cursor: Cursor to query, use current if not specified
@@ -374,9 +379,10 @@ class Dbo:
 
         batch_nr = 0
         row_count = 0
-        transformer = DataTransformer(
-            cursor, return_type=return_type, upper_case=self.upper_case, include_none=include_none
-        )
+        transformer = DataTransformer(cursor,
+                                      return_type=return_type,
+                                      upper_case=self.upper_case,
+                                      include_none=include_none)
         while True:
             batch_nr += 1
             fetch_error = None
@@ -527,20 +533,17 @@ class DataTransformer:
         elif isinstance(return_type, tuple):
             for x, rt in enumerate(return_type, start=1):
                 if not isinstance(rt, str):
-                    raise TypeError(
-                        "Specified return type is not a tuple of strings: element {} is a {}".format(
-                            x, type(rt).__name__
-                        )
-                    )
+                    raise TypeError("Specified return type is not a tuple of strings: element {} is a {}".format(
+                        x,
+                        type(rt).__name__))
             self.force_transformation = True
 
         elif return_type not in expected_types:
             str_types = [str(t).split("'")[1] for t in expected_types]
             raise TypeError(
                 "Specified return type must me one of: {} or a (list) of string identifiers. Found: {}".format(
-                    ", ".join(str_types), type(return_type).__name__
-                )
-            )
+                    ", ".join(str_types),
+                    type(return_type).__name__))
         self.return_type = return_type
         self.include_none = verified_boolean(include_none)
 
@@ -582,7 +585,7 @@ class DataTransformer:
             # Bugfix: jpype for some multibyte characters parses the surrogate unicode escape string
             #         most notably 4-byte utf-8 for emoji
             return v.encode("utf-16", errors="surrogatepass").decode("utf-16")
-        if type(v) == "java.lang.String":
+        if type(v) == "java.lang.String":  #  TODO: JString? use isinstance?
             return v.getBytes().decode()
         else:
             return v
@@ -679,13 +682,8 @@ class DataTransformer:
             single_value_transformers = dict(
                 str=(lambda vv: vv if isinstance(vv, str) else str(vv)),
                 int=(lambda vv: vv if isinstance(vv, int) else int(vv)),
-                bool=(
-                    lambda vv: vv
-                    if isinstance(vv, bool)
-                    else bool(vv)
-                    if not isinstance(vv, str)
-                    else vv.lower() in ["true", "1", "yes", "si", "y", "s"]
-                ),
+                bool=(lambda vv: vv if isinstance(vv, bool) else bool(vv)
+                      if not isinstance(vv, str) else vv.lower() in ["true", "1", "yes", "si", "y", "s"]),
                 float=(lambda vv: vv if isinstance(vv, float) else float(vv)),
                 date=(lambda vv: vv if isinstance(vv, datetime) else string2date(vv)),
             )
@@ -714,6 +712,24 @@ class DataTransformer:
                 if self.include_none or (value is not None):
                     dd[self.columns[x]] = value
             return dd
+
+
+def string2date(str_value: str) -> datetime:
+    """
+    Convert a string into a datetime object
+    @param str_value: str - the input in the format yyyy-mm-dd [HH:MM:SS.msec]
+    @return: datetime - the converted time
+    @raises ValueError if the input string cannot be converted
+    """
+    if not isinstance(str_value, str):
+        raise ValueError('Invalid argument type in string2date(). Must be a string.')
+    if RE_IS_DATE_TIME.match(str_value):
+        return dt_parse(str_value)
+    elif RE_IS_DATE.match(str_value):
+        return datetime.strptime(str_value[:10], '%Y-%m-%d')
+    else:
+        msg = 'Invalid time format. Must be yyyy-mm-dd HH:MMM:SS. Found: ({})'.format(str_value)
+        raise ValueError(msg)
 
 
 def get_columns_of_cursor(cursor: Cursor) -> OrderedDict:
@@ -760,11 +776,11 @@ def get_conn(login, cfg):
     # result = ""
     # TODO: Åpne først med sqlite_utils med wal enabled her hvis er type sqlite?
 
-    with contextlib.redirect_stderr(StringIO()) as f:
+    with contextlib.redirect_stderr(StringIO()):
         dbo = Dbo(login, cfg)
 
     # result = f.getvalue()
-     #gui.print_msg(str(result), cfg, style=gui.style.warning)
+    # gui.print_msg(str(result), cfg, style=gui.style.warning)
 
     return dbo
 
@@ -908,7 +924,7 @@ def get_table_count(jdbc, table_name, cfg):
     conn = dbo.connection
     table_reader_cursor = conn.cursor()
     table_reader_cursor.execute("SELECT COUNT(*) from " + table_name)
-    (row_count,) = table_reader_cursor.fetchone()
+    (row_count, ) = table_reader_cursor.fetchone()
 
     table_reader_cursor.close()
     conn.close()
@@ -961,9 +977,11 @@ def get_all_tables_count(jdbc, cfg, keys=True):
                 include = 1
                 source_table = _dict.get_key_from_value(norm_tables, norm_table)
                 row_count = get_table_count(jdbc, db_table, cfg)
-                cfg.config_db["tables"].update(
-                    source_table, {"target_name": db_table, "created": 1, "target_row_count": row_count}
-                )
+                cfg.config_db["tables"].update(source_table, {
+                    "target_name": db_table,
+                    "created": 1,
+                    "target_row_count": row_count
+                })
 
         if include and keys:
             get_primary_key(jdbc, db_table, cfg, source_table)
@@ -984,12 +1002,8 @@ def fix_column_size(tables, first_run, cfg):
     fixed = {}
     for row in cfg.config_db["columns"].rows:
         source_table = str(row["source_table"])
-        if (
-            source_table in tables
-            and int(row["fixed_size"]) == 0
-            and int(row["jdbc_data_type"]) in (-15, -9, -8, 1, 12)
-            and int(row["source_column_size"]) > 4000
-        ):
+        if (source_table in tables and int(row["fixed_size"]) == 0
+                and int(row["jdbc_data_type"]) in (-15, -9, -8, 1, 12) and int(row["source_column_size"]) > 4000):
             gui.print_overwrite(source_table)
             if " " in source_table:
                 source_table = '"' + source_table + '"'
@@ -1001,8 +1015,7 @@ def fix_column_size(tables, first_run, cfg):
                 source_column = '"' + source_column + '"'
 
             max_length = str(
-                jdbc.query_single_value("SELECT MAX(LENGTH(" + source_column + ")) FROM " + source_table) or 0
-            )
+                jdbc.query_single_value("SELECT MAX(LENGTH(" + source_column + ")) FROM " + source_table) or 0)
             cfg.config_db["columns"].update(row["tbl_col_pos"], {"source_column_size": max_length, "fixed_size": 1})
             fixed[str(row["tbl_col_pos"])] = max_length
 

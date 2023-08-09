@@ -46,8 +46,7 @@ def get_sources(main_cfg):
             if (pth.name != "documents"
                     and not Path(pth, "datapackage.json").is_file()  # Missing datapackage schema for db source
                     or any(Path(pth).iterdir()) is False  # Empty directory
-                    or (pth.name != "documents" and not db_path.is_file())  # Missing db for db source
-                ):
+                    or (pth.name != "documents" and not db_path.is_file())):  # Missing db for db source
                 gui.print_msg("'" + str(source) + "' is not a valid source. Aborted.", exit=True)
 
             if pth.name == "documents":
@@ -142,7 +141,8 @@ def validate_tables(deps_list, table_deps, archived_tables, cfg):
     gui.print_msg("Validating dependent tables againsts datapackage schema...", style=gui.style.info)
 
     schema_path = Path(cfg.source.parent, "partial_datapackage.json")
-    if validate(dp.create_schema(cfg, True, tables=deps_list, schema_path=schema_path)).valid is False:
+    report = validate(dp.create_schema(cfg, True, tables=deps_list, schema_path=schema_path))
+    if report.valid is False:
         gui.show(cfg, report, exit=True, error=True)
 
     for table in deps_list:

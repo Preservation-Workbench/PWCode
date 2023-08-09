@@ -13,23 +13,21 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import sys
 from pathlib import Path
 import json
-import re
 import tempfile
-from toposort import toposort_flatten
 
 import jpype as jp
+from frictionless import Package
 from utils import _dict
 import jdbc
 import gui
-from frictionless import Package, Resource, Schema, Field
 from sqlalchemy import create_engine
 import configdb
 
 
 def get_copy_statements(json_schema_file, cfg, diff_data):
+
     def _dump(sql, *multiparams, **params):
         pass
 
@@ -47,24 +45,17 @@ def get_copy_statements(json_schema_file, cfg, diff_data):
 
         # params = "-mode=INSERT -ignoreIdentityColumns=false -commitEvery=10000 "
         params = "-mode=INSERT -ignoreIdentityColumns=false "  # Bug in -commitEvery - at least for h2
-        pragmas = ";".join(
-            (
-                "PRAGMA foreign_keys=0",
-                "PRAGMA journal_mode=0",
-                "PRAGMA synchronous=0",
-                "PRAGMA temp_store=MEMORY",
-            )
-        )
+        pragmas = ";".join((
+            "PRAGMA foreign_keys=0",
+            "PRAGMA journal_mode=0",
+            "PRAGMA synchronous=0",
+            "PRAGMA temp_store=MEMORY",
+        ))
 
         url = cfg.target.short_url
         if cfg.target.type == "sqlite":
-            url = (
-                url
-                + ",driverJar="
-                + cfg.jdbc_drivers[cfg.target.type]["jar"]
-                + ",driver="
-                + cfg.jdbc_drivers[cfg.target.type]["class"]
-            )
+            url = (url + ",driverJar=" + cfg.jdbc_drivers[cfg.target.type]["jar"] + ",driver=" +
+                   cfg.jdbc_drivers[cfg.target.type]["class"])
             params = params + '-preTableStatement="' + pragmas + '" '
 
         source_type = cfg.source.type
@@ -75,13 +66,11 @@ def get_copy_statements(json_schema_file, cfg, diff_data):
         if cfg.target.type == "h2":
             target_type = "postgresql"
 
-        source_quote = create_engine(
-            "%s://" % source_type, strategy="mock", executor=_dump
-        ).dialect.identifier_preparer.quote
+        source_quote = create_engine("%s://" % source_type, strategy="mock",
+                                     executor=_dump).dialect.identifier_preparer.quote
 
-        target_quote = create_engine(
-            "%s://" % target_type, strategy="mock", executor=_dump
-        ).dialect.identifier_preparer.quote
+        target_quote = create_engine("%s://" % target_type, strategy="mock",
+                                     executor=_dump).dialect.identifier_preparer.quote
 
         with open(json_schema_file) as f:
             package = Package(json.load(f))
@@ -99,29 +88,17 @@ def get_copy_statements(json_schema_file, cfg, diff_data):
 
                     if jdbc_db_type in [91, 93] and cfg.target.type == "sqlite":
                         if cfg.source.type == "h2":
-                            fixed_source_column_name = (
-                                "FORMATDATETIME("
-                                + source_quote(source_column_name)
-                                + ",'YYYY-MM-DD HH:mm:ss') AS "
-                                + source_quote(target_column_name)
-                                + ","
-                            )
+                            fixed_source_column_name = ("FORMATDATETIME(" + source_quote(source_column_name) +
+                                                        ",'YYYY-MM-DD HH:mm:ss') AS " +
+                                                        source_quote(target_column_name) + ",")
                         elif cfg.source.type == "sqlite":
-                            fixed_source_column_name = (
-                                "DATETIME(SUBSTR("
-                                + source_quote(source_column_name)
-                                + ",1,10), 'unixepoch') AS "
-                                + source_quote(target_column_name)
-                                + ","
-                            )
+                            fixed_source_column_name = ("DATETIME(SUBSTR(" + source_quote(source_column_name) +
+                                                        ",1,10), 'unixepoch') AS " + source_quote(target_column_name) +
+                                                        ",")
                         elif cfg.source.type == "oracle":
-                            fixed_source_column_name = (
-                                "TO_CHAR("
-                                + source_quote(source_column_name)
-                                + ",'YYYY-MM-DD HH24:MM:SS') AS "
-                                + source_quote(target_column_name)
-                                + ","
-                            )
+                            fixed_source_column_name = ("TO_CHAR(" + source_quote(source_column_name) +
+                                                        ",'YYYY-MM-DD HH24:MM:SS') AS " +
+                                                        source_quote(target_column_name) + ",")
                         else:
                             gui.print_msg(
                                 "Datetime to formatted string in sqlite not implemented for '" + cfg.source.type + "'",
@@ -129,29 +106,14 @@ def get_copy_statements(json_schema_file, cfg, diff_data):
                             )
                     elif jdbc_db_type == 92 and cfg.target.type == "sqlite":
                         if cfg.source.type == "h2":
-                            fixed_source_column_name = (
-                                "FORMATDATETIME("
-                                + source_quote(source_column_name)
-                                + ",'HH:mm:ss') AS "
-                                + source_quote(target_column_name)
-                                + ","
-                            )
+                            fixed_source_column_name = ("FORMATDATETIME(" + source_quote(source_column_name) +
+                                                        ",'HH:mm:ss') AS " + source_quote(target_column_name) + ",")
                         elif cfg.source.type == "sqlite":
-                            fixed_source_column_name = (
-                                "TIME("
-                                + source_quote(source_column_name)
-                                + ") AS "
-                                + source_quote(target_column_name)
-                                + ","
-                            )
+                            fixed_source_column_name = ("TIME(" + source_quote(source_column_name) + ") AS " +
+                                                        source_quote(target_column_name) + ",")
                         elif cfg.source.type == "oracle":
-                            fixed_source_column_name = (
-                                "TO_CHAR("
-                                + source_quote(source_column_name)
-                                + ",'HH24:MM:SS') AS "
-                                + source_quote(target_column_name)
-                                + ","
-                            )
+                            fixed_source_column_name = ("TO_CHAR(" + source_quote(source_column_name) +
+                                                        ",'HH24:MM:SS') AS " + source_quote(target_column_name) + ",")
                         else:
                             gui.print_msg(
                                 "Time to formatted string in sqlite not implemented for '" + cfg.source.type + "'",
@@ -161,38 +123,21 @@ def get_copy_statements(json_schema_file, cfg, diff_data):
                     elif source_column_name.lower() == target_column_name.lower():
                         fixed_source_column_name = source_quote(source_column_name) + ","
                     else:
-                        fixed_source_column_name = (
-                            source_quote(source_column_name) + " AS " + source_quote(target_column_name) + ","
-                        )
+                        fixed_source_column_name = (source_quote(source_column_name) + " AS " +
+                                                    source_quote(target_column_name) + ",")
 
                     ddl_columns.append(fixed_source_column_name)
 
-                source_query = " ".join(
-                    (
-                        "SELECT",
-                        "".join(ddl_columns)[:-1],
-                        "FROM",
-                        source_table_name,
-                    )
-                )
+                source_query = " ".join((
+                    "SELECT",
+                    "".join(ddl_columns)[:-1],
+                    "FROM",
+                    source_table_name,
+                ))
 
-                copy_data_str = (
-                    "WbCopy "
-                    + params
-                    + '-targetConnection="username='
-                    + cfg.target.user
-                    + ",password="
-                    + cfg.target.password
-                    + ",url="
-                    + url
-                    + '" -targetTable="'
-                    + cfg.target.schema
-                    + '".'
-                    + target_table_name
-                    + " -sourceQuery="
-                    + source_query
-                    + ";"
-                )
+                copy_data_str = ("WbCopy " + params + '-targetConnection="username=' + cfg.target.user + ",password=" +
+                                 cfg.target.password + ",url=" + url + '" -targetTable="' + cfg.target.schema + '".' +
+                                 target_table_name + " -sourceQuery=" + source_query + ";")
 
                 with open(copy_file, "a") as file:
                     file.write("\n" + copy_data_str)
@@ -226,23 +171,18 @@ def run_ddl_file(jdbc, cfg, diff_tables, ddl_file, echo=False):
                     with open(Path(td, norm_table + "_ddl.sql"), "w") as fw:
                         fw.write(tbl_ddl)
 
-                    gui.print_msg("Creating table '" + source_table + "':", style=gui.style.info,highlight=True)
+                    gui.print_msg("Creating table '" + source_table + "':", style=gui.style.info, highlight=True)
 
                     result = str(
-                        batch.runScript(
-                            " ".join(
-                                (
-                                    conn,
-                                    "WbInclude",
-                                    "-file=" + str(ddl_file),
-                                    "-verbose=" + str(echo),
-                                    "-printStatements=" + str(cfg.debug),
-                                    "-encoding=UTF8;",
-                                    "commit; WbDisconnect;",
-                                )
-                            )
-                        )
-                    )
+                        batch.runScript(" ".join((
+                            conn,
+                            "WbInclude",
+                            "-file=" + str(ddl_file),
+                            "-verbose=" + str(echo),
+                            "-printStatements=" + str(cfg.debug),
+                            "-encoding=UTF8;",
+                            "commit; WbDisconnect;",
+                        ))))
 
                     if str(result) == "Error":
                         gui.print_msg(str(result), exit=True)
@@ -251,15 +191,13 @@ def run_ddl_file(jdbc, cfg, diff_tables, ddl_file, echo=False):
 
 
 def get_connect_cmd(jdbc, cfg):
-    connect_cmd = " ".join(
-        (
-            "WbConnect -url=" + jdbc.short_url,
-            "-username=" + jdbc.user,
-            "-password=" + jdbc.password,
-            "-driverJar=" + cfg.jdbc_drivers[jdbc.type]["jar"],
-            "-driver=" + cfg.jdbc_drivers[jdbc.type]["class"] + ";",
-        )
-    )
+    connect_cmd = " ".join((
+        "WbConnect -url=" + jdbc.short_url,
+        "-username=" + jdbc.user,
+        "-password=" + jdbc.password,
+        "-driverJar=" + cfg.jdbc_drivers[jdbc.type]["jar"],
+        "-driver=" + cfg.jdbc_drivers[jdbc.type]["class"] + ";",
+    ))
 
     return connect_cmd
 
@@ -298,13 +236,11 @@ def run_command(jdbc, sql, cfg):
     sql = sql.strip()
     sql = sql[:-1:] + sql[-1].replace(";", "") + ";"
 
-    cmd = " ".join(
-        (
-            get_connect_cmd(jdbc, cfg),
-            sql,
-            "WbDisconnect;",
-        )
-    )
+    cmd = " ".join((
+        get_connect_cmd(jdbc, cfg),
+        sql,
+        "WbDisconnect;",
+    ))
 
     if cfg.debug:
         print(sql)
@@ -326,7 +262,7 @@ def run_copy_file(cfg, copy_file, diff_data):
 
     statements = []
     with open(copy_file) as file:
-        statements = [l for l in file.read().splitlines() if l.strip()]
+        statements = [line for line in file.read().splitlines() if line.strip()]
 
     gui.print_msg("Copying tables from source to target database:\n", style=gui.style.info)
 
@@ -336,7 +272,7 @@ def run_copy_file(cfg, copy_file, diff_data):
 
     for statement in statements:
         target_table = statement.partition("-targetTable=")[2].partition(" ")[0].partition(".")[2].strip()
-        source_table = statement[statement.rindex(" ") + 1 :][:-1].replace('"', "")
+        source_table = statement[statement.rindex(" ") + 1:][:-1].replace('"', "")
         source_row_count = int(row_count_pr_table[source_table])
 
         cp_result = ""
@@ -351,13 +287,11 @@ def run_copy_file(cfg, copy_file, diff_data):
                 highlight=True,
             )
 
-            copy_cmd = " ".join(
-                (
-                    source_conn,
-                    statement,
-                    "WbDisconnect;",
-                )
-            )
+            copy_cmd = " ".join((
+                source_conn,
+                statement,
+                "WbDisconnect;",
+            ))
 
             batch = get_batch()
             cp_result = str(batch.runScript(copy_cmd))
@@ -388,9 +322,9 @@ def run_copy_file(cfg, copy_file, diff_data):
                         sqlwb_truncate_table(target_table, source_table, cfg)
 
             else:
-                gui.print_msg(
-                    "'" + source_table + "' copied/deleted in previous test run.", style=gui.style.info, highlight=True
-                )
+                gui.print_msg("'" + source_table + "' copied/deleted in previous test run.",
+                              style=gui.style.info,
+                              highlight=True)
 
     if error_tables:
         gui.print_msg("Errors on copying tables '" + ", ".join(error_tables) + "'", exit=True)
@@ -399,26 +333,24 @@ def run_copy_file(cfg, copy_file, diff_data):
 
 
 def export_text_columns(dbo, table, text_columns, tsv_path, cfg):
-    cmd = " ".join(
-        (
-            get_connect_cmd(dbo, cfg),
-            "WbExport",
-            "-type=text",
-            "-file=" + str(tsv_path),
-            "-continueOnError=false",
-            "-encoding=UTF8",
-            "-header=true",
-            "-decimal='.'",
-            "-maxDigits=0",
-            "-lineEnding=lf",
-            "-replaceExpression='(\\n|\\r\\n|\\r|\\t)' -replaceWith=' '",
-            "-trimCharData=true",
-            "-nullString=''",
-            "-showProgress=100000;",
-            "SELECT " + ",".join(text_columns.values()) + " FROM " + table.name + ";",
-            "WbDisconnect;",
-        )
-    )
+    cmd = " ".join((
+        get_connect_cmd(dbo, cfg),
+        "WbExport",
+        "-type=text",
+        "-file=" + str(tsv_path),
+        "-continueOnError=false",
+        "-encoding=UTF8",
+        "-header=true",
+        "-decimal='.'",
+        "-maxDigits=0",
+        "-lineEnding=lf",
+        "-replaceExpression='(\\n|\\r\\n|\\r|\\t)' -replaceWith=' '",
+        "-trimCharData=true",
+        "-nullString=''",
+        "-showProgress=100000;",
+        "SELECT " + ",".join(text_columns.values()) + " FROM " + table.name + ";",
+        "WbDisconnect;",
+    ))
 
     batch = get_batch()
 

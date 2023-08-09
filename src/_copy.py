@@ -13,12 +13,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import sys
 from pathlib import Path
-from dataclasses import dataclass, asdict
 import tarfile
 import shutil
-import re
 import os
 
 from pathvalidate import replace_symbol
@@ -32,7 +29,7 @@ import project
 import dp
 import sqlwb
 import db
-from utils import _file, _java
+from utils import _file
 import _sqlite
 
 
@@ -128,11 +125,11 @@ def get_copy_cfg(main_cfg):
 
     if type(source).__name__ == "Dbo":
         source_type = source.type
-        source_schema = source.schema
+        # source_schema = source.schema
 
         if type(target).__name__ == "Dbo":
             target_type = target.type
-            target_schema = target.schema
+            # target_schema = target.schema
 
         elif Path(target).is_dir():
             target_type = "files"
@@ -150,11 +147,10 @@ def get_copy_cfg(main_cfg):
             project_dir = Path(target)
         else:
             target_type = "project"
-            project_dir = Path(cfg.projects_dir, target)
+            project_dir = Path(main_cfg.projects_dir, target)
 
-    target_db_path, content_dir, target_name, data_dir, tmp_dir = project.get(
-        source, target, source_type, target_type, project_dir
-    )
+    target_db_path, content_dir, target_name, data_dir, tmp_dir = project.get(source, target, source_type, target_type,
+                                                                              project_dir)
 
     main_cfg_values = {}
     for key, value in main_cfg.__dict__.items():
@@ -196,10 +192,8 @@ def capture_files(cfg):
 
         if row["source_path"] == cfg.source:
             copied = 2
-            if (
-                str(tar_disk_path.stat().st_mtime) == row["tar_mtime"]  # unmodified file content (unmoved file)
-                or _file.get_checksum(tar_disk_path) == row["tar_checksum"]  # Unmodified file content (moved file)
-            ):
+            if (str(tar_disk_path.stat().st_mtime) == row["tar_mtime"]  # unmodified file (unmoved file)
+                    or _file.get_checksum(tar_disk_path) == row["tar_checksum"]):  # Unmodified file (moved file)
                 copied = 1
 
     if copied == 1:

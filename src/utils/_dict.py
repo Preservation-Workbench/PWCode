@@ -13,13 +13,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import os
 
-#For dictionaries with no duplicate values
+# For dictionaries with no duplicate values
 def get_key_from_value(d, val):
     keys = [k for k, v in d.items() if v == val]
     if keys:
         return keys[0]
     return None
-
-

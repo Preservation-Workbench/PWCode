@@ -13,9 +13,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from pathlib import Path
-import sys
-
 import gui
 import jdbc
 from sqlite_utils import Database
@@ -131,18 +128,16 @@ def update_table_deps(tables, cfg):
     deps_dict = {}
     for table in tables:
         table_deps = set()
-        for row in cfg.config_db.query(
-            f"""
-            SELECT c.source_column,
-                   f.source_ref_column,
-                   f.source_ref_table
-            FROM foreign_keys f
-              LEFT JOIN columns c
-                     ON c.source_column = f.source_column
-                    AND c.source_table = f.source_table
-            WHERE c.source_table = '{table}'
-            """
-        ):
+        for row in cfg.config_db.query(f"""
+                SELECT c.source_column,
+                       f.source_ref_column,
+                       f.source_ref_table
+                FROM foreign_keys f
+                  LEFT JOIN columns c
+                         ON c.source_column = f.source_column
+                        AND c.source_table = f.source_table
+                WHERE c.source_table = '{table}'
+                """):
             ref_table = row["source_ref_table"]
             if ref_table in tables:
                 table_deps.add(ref_table)
@@ -161,40 +156,37 @@ def update_table_deps(tables, cfg):
 
 def connect_column_fk(cfg):
     # Connect foreign key references to table-column-postions:
-    for row in cfg.config_db.query(
-        f"""
-        SELECT f.source_name,
-               f.source_table,
-               f.source_column,
-               f.source_ref_table,
-               f.source_ref_column,
-               (SELECT f.tbl_col_pos
-                FROM columns c
-                WHERE c.source_column = f.source_column
-                AND   c.source_table = f.source_table) AS tbl_col_pos,
-               (SELECT f.tbl_col_pos
-                FROM columns c
-                WHERE c.source_column = f.source_ref_column
-                AND   c.source_table = f.source_ref_table) AS ref_tbl_col_pos
-        FROM foreign_keys f
-        """
-    ):
-        cfg.config_db["foreign_keys"].update(
-            row["source_name"], {"tbl_col_pos": row["tbl_col_pos"], "ref_tbl_col_pos": row["ref_tbl_col_pos"]}
-        )
+    for row in cfg.config_db.query("""
+            SELECT f.source_name,
+                   f.source_table,
+                   f.source_column,
+                   f.source_ref_table,
+                   f.source_ref_column,
+                   (SELECT f.tbl_col_pos
+                    FROM columns c
+                    WHERE c.source_column = f.source_column
+                    AND   c.source_table = f.source_table) AS tbl_col_pos,
+                   (SELECT f.tbl_col_pos
+                    FROM columns c
+                    WHERE c.source_column = f.source_ref_column
+                    AND   c.source_table = f.source_ref_table) AS ref_tbl_col_pos
+            FROM foreign_keys f
+            """):
+        cfg.config_db["foreign_keys"].update(row["source_name"], {
+            "tbl_col_pos": row["tbl_col_pos"],
+            "ref_tbl_col_pos": row["ref_tbl_col_pos"]
+        })
 
 
 def get_norm_tables(config_db):
     norm_tables = {}
-    for row in config_db.query(
-        f"""
-        SELECT source_name,
-               norm_name
-        FROM tables
-        WHERE source_row_count > 0
-        AND   include = 1
-        """
-    ):
+    for row in config_db.query("""
+            SELECT source_name,
+                   norm_name
+            FROM tables
+            WHERE source_row_count > 0
+            AND   include = 1
+            """):
         norm_tables[row["source_name"]] = row["norm_name"]
 
     return norm_tables
@@ -202,18 +194,16 @@ def get_norm_tables(config_db):
 
 def get_norm_columns(config_db):
     norm_columns = {}
-    for row in config_db.query(
-        f"""
-        SELECT c.source_table,
-               c.source_column,
-               c.norm_column
-        FROM tables t
-          inner JOIN columns c
-                  ON c.source_table = t.source_name
-                 AND t.source_row_count > 0
-                 AND t.include = 1
-        """
-    ):
+    for row in config_db.query("""
+            SELECT c.source_table,
+                   c.source_column,
+                   c.norm_column
+            FROM tables t
+              inner JOIN columns c
+                      ON c.source_table = t.source_name
+                     AND t.source_row_count > 0
+                     AND t.include = 1
+            """):
         norm_columns[row["source_table"] + ":" + row["source_column"]] = row["norm_column"]
 
     return norm_columns
@@ -221,15 +211,13 @@ def get_norm_columns(config_db):
 
 def get_include_tables(cfg):
     include_tables = []
-    for row in cfg.config_db.query(
-        f"""
-        SELECT source_name
-        FROM tables
-        WHERE source_row_count > 0
-        AND   include = 1
-        ORDER BY deps_order ASC
-        """
-    ):
+    for row in cfg.config_db.query("""
+            SELECT source_name
+            FROM tables
+            WHERE source_row_count > 0
+            AND   include = 1
+            ORDER BY deps_order ASC
+            """):
         include_tables.append(row["source_name"])
 
     return include_tables
@@ -237,15 +225,13 @@ def get_include_tables(cfg):
 
 def get_validated_tables(cfg):
     validated_tables = []
-    for row in cfg.config_db.query(
-        f"""
-        SELECT norm_name
-        FROM tables
-        WHERE source_row_count > 0
-        AND   validated = 1
-        ORDER BY deps_order ASC
-        """
-    ):
+    for row in cfg.config_db.query("""
+            SELECT norm_name
+            FROM tables
+            WHERE source_row_count > 0
+            AND   validated = 1
+            ORDER BY deps_order ASC
+            """):
         validated_tables.append(row["norm_name"])
 
     return validated_tables
@@ -254,24 +240,20 @@ def get_validated_tables(cfg):
 def get_tables_count(jdbc, cfg):
     tables_count = {}
     if jdbc == cfg.source:
-        for row in cfg.config_db.query(
-            f"""
-            SELECT source_name,
-                   source_row_count
-            FROM tables
-            WHERE source_row_count > 0
-            """
-        ):
+        for row in cfg.config_db.query("""
+                SELECT source_name,
+                       source_row_count
+                FROM tables
+                WHERE source_row_count > 0
+                """):
             tables_count[row["source_name"]] = row["source_row_count"]
     else:
-        for row in cfg.config_db.query(
-            f"""
-            SELECT source_name,
-                   target_row_count
-            FROM tables
-            WHERE include = 1
-            """
-        ):
+        for row in cfg.config_db.query("""
+                SELECT source_name,
+                       target_row_count
+                FROM tables
+                WHERE include = 1
+                """):
             tables_count[row["source_name"]] = row["target_row_count"]
 
     return tables_count
@@ -279,27 +261,23 @@ def get_tables_count(jdbc, cfg):
 
 def update_include(cfg, tables):
     for row in cfg.config_db["tables"].rows:
-        if row["source_name"] in tables or (
-            int(row["source_row_count"]) > 0 and int(row["target_row_count"]) == int(row["source_row_count"])
-        ):
+        if row["source_name"] in tables or (int(row["source_row_count"]) > 0
+                                            and int(row["target_row_count"]) == int(row["source_row_count"])):
             cfg.config_db["tables"].update(row["source_name"], {"include": 1})
 
-        if row["source_name"] not in tables and (
-            int(row["target_row_count"]) != int(row["source_row_count"]) or int(row["source_row_count"]) == 0
-        ):
+        if row["source_name"] not in tables and (int(row["target_row_count"]) != int(row["source_row_count"])
+                                                 or int(row["source_row_count"]) == 0):
             cfg.config_db["tables"].update(row["source_name"], {"include": 0})
 
 
 def get_copied_tables(cfg):
     copied_tables = []
-    for row in cfg.config_db.query(
-        f"""
-        SELECT source_name
-        FROM tables
-        WHERE source_row_count > 0
-        AND   source_row_count = target_row_count
-        """
-    ):
+    for row in cfg.config_db.query("""
+            SELECT source_name
+            FROM tables
+            WHERE source_row_count > 0
+            AND   source_row_count = target_row_count
+            """):
         copied_tables.append(row["source_name"])
 
     return copied_tables
@@ -307,13 +285,11 @@ def get_copied_tables(cfg):
 
 def get_tables_deps(cfg):
     deps_pr_table = {}
-    for row in cfg.config_db.query(
-        f"""
-        SELECT source_name,
-               deps
-        FROM tables
-        """
-    ):
+    for row in cfg.config_db.query("""
+            SELECT source_name,
+                   deps
+            FROM tables
+            """):
         deps_pr_table[row["source_name"]] = row["deps"]
 
     return deps_pr_table
@@ -334,7 +310,7 @@ def tables_diff(cfg):
 
     diff_tables = []
     for table in get_include_tables(cfg):
-        if not table in created_tables:
+        if table not in created_tables:
             diff_tables.append(table)
 
     return diff_tables
@@ -349,14 +325,12 @@ def data_diff(cfg, count=False):
         jdbc.get_all_tables_count(cfg.target, cfg)
 
     tables = get_include_tables(cfg)
-    for row in cfg.config_db.query(
-        f"""
-        SELECT source_name,
-               source_row_count
-        FROM tables
-        WHERE source_row_count != target_row_count
-        """
-    ):
+    for row in cfg.config_db.query("""
+            SELECT source_name,
+                   source_row_count
+            FROM tables
+            WHERE source_row_count != target_row_count
+            """):
         if row["source_name"] in tables:
             diff_data[row["source_name"]] = row["source_row_count"]
 

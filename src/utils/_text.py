@@ -13,8 +13,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+
 def replace_all(val, repls):
-    #repls = {"\x00": "", "\t": " "}  # Remove null bytes, tabs etc
+    # repls = {"\x00": "", "\t": " "}  # Remove null bytes, tabs etc
     for key in repls:
         val = val.replace(key, repls[key])
     return val

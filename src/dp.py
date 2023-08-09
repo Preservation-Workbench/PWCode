@@ -21,22 +21,17 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-
-import sys
-import os
 import json
 from pathlib import Path
-from functools import reduce
-import sqlite3
 
 import gui
-from frictionless import Package, Resource, Schema, Dialect, Field, formats, system, Plugin, platform, validate
-from typing import Type
-from sqlite_utils import Database
+from frictionless import Package, Resource, platform
+from typing import Type, Dict
 import db
 import sqlalchemy as sa
 from sqlalchemy.schema import CreateTable
-from sqlalchemy.dialects.oracle import VARCHAR2, NVARCHAR2
+from sqlalchemy.types import TypeEngine
+from sqlalchemy.dialects.oracle import VARCHAR2
 import configdb
 
 
@@ -62,14 +57,12 @@ def write_field(engine, field):
 
     # Postgresql dialect:
     if engine.dialect.name.startswith("postgresql"):
-        mapping.update(
-            {
-                "array": sapg.JSONB,
-                "geojson": sapg.JSONB,
-                "number": sa.Numeric,
-                "object": sapg.JSONB,
-            }
-        )
+        mapping.update({
+            "array": sapg.JSONB,
+            "geojson": sapg.JSONB,
+            "number": sa.Numeric,
+            "object": sapg.JSONB,
+        })
 
     type = mapping.get(field.type, sa.Text)
     return type
@@ -138,8 +131,7 @@ def write_table(engine, schema, args, fk, *, table_name):
             fields = fk["fields"]
             foreign_fields = fk["reference"]["fields"]
             foreign_table_name = fk["reference"]["resource"] or table_name
-            composer = lambda field: ".".join([foreign_table_name, field])
-            foreign_fields = list(map(composer, foreign_fields))
+            foreign_fields = list(map(lambda field: ".".join([foreign_table_name, field]), foreign_fields))
             constraint = sa.ForeignKeyConstraint(fields, foreign_fields)
             constraints.append(constraint)
 
@@ -151,7 +143,6 @@ def create_schema(cfg, changed, tables=[], schema_path=None):
     if len(tables) == 0:
         target_name = cfg.target_name
         schema_path = cfg.schema_path
-        #schema_path = Path(cfg.content_dir, "datapackage.json")
     else:
         target_name = "partial"
 
@@ -181,19 +172,17 @@ def create_schema(cfg, changed, tables=[], schema_path=None):
 
     norm_tables = configdb.get_norm_tables(cfg.config_db)
     norm_columns = configdb.get_norm_columns(cfg.config_db)
-    for row in cfg.config_db.query(
-        f"""
-        SELECT source_name,
-               norm_name,
-               source_pk,
-               source_row_count,
-               deps
-        FROM tables
-        WHERE source_row_count > 0
-        AND   include = 1
-        ORDER BY deps_order ASC
-        """
-    ):
+    for row in cfg.config_db.query("""
+            SELECT source_name,
+                   norm_name,
+                   source_pk,
+                   source_row_count,
+                   deps
+            FROM tables
+            WHERE source_row_count > 0
+            AND   include = 1
+            ORDER BY deps_order ASC
+            """):
         source_table = str(row["source_name"])
         norm_table = str(row["norm_name"])
         source_pk = str(row["source_pk"])
@@ -207,16 +196,14 @@ def create_schema(cfg, changed, tables=[], schema_path=None):
 
         pk = []
         fields = []
-        for row in cfg.config_db.query(
-            f"""
-            SELECT source_column,
-                   norm_column,
-                   jdbc_data_type,
-                   source_column_size
-            FROM columns
-            WHERE source_table = '{source_table}'
-            """
-        ):
+        for row in cfg.config_db.query(f"""
+                SELECT source_column,
+                       norm_column,
+                       jdbc_data_type,
+                       source_column_size
+                FROM columns
+                WHERE source_table = '{source_table}'
+                """):
             source_column = str(row["source_column"])
             norm_column = str(row["norm_column"])
             jdbc_data_type = int(row["jdbc_data_type"])
@@ -249,48 +236,42 @@ def create_schema(cfg, changed, tables=[], schema_path=None):
             table_descr.update({"primaryKey": pk})
 
         foreign_keys = []
-        for row in cfg.config_db.query(
-            f"""
-            SELECT c.norm_column,
-                   f.source_ref_table,
-                   f.source_ref_column
-            FROM foreign_keys f
-              LEFT JOIN columns c
-                     ON c.source_column = f.source_column
-                    AND c.source_table = f.source_table
-            WHERE c.source_table = '{source_table}'
-            """
-        ):
+        for row in cfg.config_db.query(f"""
+                SELECT c.norm_column,
+                       f.source_ref_table,
+                       f.source_ref_column
+                FROM foreign_keys f
+                  LEFT JOIN columns c
+                         ON c.source_column = f.source_column
+                        AND c.source_table = f.source_table
+                WHERE c.source_table = '{source_table}'
+                """):
             source_ref_table = str(row["source_ref_table"])
             if source_ref_table not in norm_tables:
                 continue
 
-            foreign_keys.append(
-                {
-                    "fields": str(row["norm_column"]),
-                    "reference": {
-                        "resource": norm_tables[source_ref_table],
-                        "fields": norm_columns[source_ref_table + ":" + str(row["source_ref_column"])],
-                    },
-                }
-            )
+            foreign_keys.append({
+                "fields": str(row["norm_column"]),
+                "reference": {
+                    "resource": norm_tables[source_ref_table],
+                    "fields": norm_columns[source_ref_table + ":" + str(row["source_ref_column"])],
+                },
+            })
 
         if foreign_keys:
             table_descr.update({"foreignKeys": foreign_keys})
 
-        resource = Resource(
-            {
-                "name": norm_table,
-                "profile": "tabular-data-resource",
-                "path": str(Path("data", norm_table + ".tsv")),
-                "encoding": "UTF-8",
-                "db_table_name": source_table,
-                "db_table_deps": deps,
-                "count_of_rows": str(row_count),
-                "schema": table_descr,
-                "dialect": dialect,
-            }
-        )
+        resource = Resource({
+            "name": norm_table,
+            "profile": "tabular-data-resource",
+            "path": str(Path("data", norm_table + ".tsv")),
+            "encoding": "UTF-8",
+            "db_table_name": source_table,
+            "db_table_deps": deps,
+            "count_of_rows": str(row_count),
+            "schema": table_descr,
+            "dialect": dialect,
+        })
         package.add_resource(resource)
 
     package.to_json(schema_path)
@@ -345,8 +326,8 @@ def create_ddl(schema_path, changed, args):
             with open(fil, "a") as f:
                 for table in meta.sorted_tables:
                     tbl_ddl = CreateTable(table, if_not_exists=True).compile(engine)
-                    lines = [l for l in str(tbl_ddl).splitlines()]
-                    f.write("\n".join([l for l in lines if l.strip()]) + ";\n\n")
+                    lines = [line for line in str(tbl_ddl).splitlines()]
+                    f.write("\n".join([line for line in lines if line.strip()]) + ";\n\n")
 
     if args.stop == "ddl":
         gui.show(args, ddl_fk_file)

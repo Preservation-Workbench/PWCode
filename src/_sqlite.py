@@ -14,7 +14,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
-import sys
 import sqlite3
 import warnings
 import shutil
@@ -52,7 +51,7 @@ def import_excel(fil, index, conn, args):
     wb = op.load_workbook(fil, read_only=True, data_only=True)
     for ws_name in wb.sheetnames:
         for row in wb[ws_name].values:
-            if all(value == None for value in row):
+            if all(value is None for value in row):
                 continue  # Ignore empty sheets
 
         table_name = db.normalize_name(ws_name, index, length=True)
@@ -106,7 +105,7 @@ def export_xlsx(file_path, query, args):
     """
     conn = sqlite3.connect(args.target_db_path)
     table = etl.fromdb(conn, query)
-    output = etl.toxlsx(table, file_path)
+    etl.toxlsx(table, file_path)
 
 
 def ensure_tables_from_files(req_tables, args):
@@ -121,7 +120,7 @@ def ensure_tables_from_files(req_tables, args):
     tables_count = configdb.get_tables_count(args.target, args)
     for db_table in tables_count.keys():
         for req_table in req_tables:
-            if db_table.startswith(req_table + "_") and db_table[db_table.rindex("_") + 1 :].isdigit():
+            if db_table.startswith(req_table + "_") and db_table[db_table.rindex("_") + 1:].isdigit():
                 tables[req_table] = db_table
 
     for req_table, db_table in tables.items():
