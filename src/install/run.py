@@ -34,6 +34,7 @@ class Config:  # TODO: Get some values from config file!
     shfmt_bin: Path = None
     editor_url: str = "https://github.com/zyedidia/micro/releases/download/v2.0.11/micro-2.0.11-linux64.tar.gz"
     shfmt_url: str = "https://github.com/mvdan/sh/releases/download/v3.7.0/shfmt_v3.7.0_linux_amd64"
+    fzf_url: str = "https://github.com/junegunn/fzf/releases/download/0.42.0/fzf-0.42.0-linux_amd64.tar.gz"
     java_version: str = "11"
 
     def __post_init__(self):
@@ -41,12 +42,15 @@ class Config:  # TODO: Get some values from config file!
         self.deps_jar_dir = Path(self.base_dir, "deps", "jars")
         self.deps_editor_dir = Path(self.base_dir, "deps", "editor")
         self.shfmt_bin = Path(self.deps_editor_dir, "deps", "shfmt")
+        self.fzf_bin = Path(self.deps_editor_dir, "deps", "fzf")
         self.tmp_dir = Path(self.base_dir, "projects", "tmp")
         if os.name != "posix":
             self.editor_url: str = "https://github.com/zyedidia/micro/releases/download/v2.0.11/micro-2.0.11-win64.zip"
             self.deps_java_dir: Path = Path(self.base_dir, "deps", "java.windows")
             self.shfmt_url: str = "https://github.com/mvdan/sh/releases/download/v3.7.0/shfmt_v3.7.0_windows_amd64.exe"
+            self.fzf_url: str = "https://github.com/junegunn/fzf/releases/download/0.42.0/fzf-0.42.0-windows_amd64.zip"
             self.shfmt_bin = Path(self.deps_editor_dir, "deps", "shfmt.exe")
+            self.fzf_bin = Path(self.deps_editor_dir, "deps", "fzf.exe")
 
 
 def install(base_dir, src_dir, deps_python_dir):

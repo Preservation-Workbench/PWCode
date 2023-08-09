@@ -1,4 +1,14 @@
 {
+    "*.el": {
+        "commenttype": ";; %s"
+    },
+    "*.js": {
+        "tabsize": 2
+    },
+    "*.json": {
+        "commenttype": "// %s",
+        "tabsize": 2
+    },
     "autosu": true,
     "basename": true,
     "colorcolumn": 120,
@@ -6,12 +16,22 @@
     "cursorline": false,
     "divchars": "  ",
     "divreverse": false,
+    "ft:lua": {
+        "tabsize": 3
+    },
+    "ft:makefile": {
+        "tabstospaces": false
+    },
+    "ft:yaml": {
+        "tabsize": 2
+    },
     "lsp.ignoreMessages": "LS message1 to ignore|LS message 2 to ignore|...",
     "lsp.ignoreTriggerCharacters": "completion,signature",
     "lsp.server": "python=pylsp",
     "microgit.command": "/usr/bin/git",
     "mkparents": true,
     "savecursor": true,
+    "scrollspeed": 5,
     "statusformatr": " $(microgit.onbranch) ↑$(microgit.numahead) ↓$(microgit.numbehind) ↓↑$(microgit.numstaged) | commit:$(microgit.oncommit)",
     "tabmovement": true,
     "tabstospaces": true,

@@ -24,8 +24,6 @@ from maven_artifact import Downloader
 from maven_artifact.artifact import Artifact
 import requests
 
-# TODO: Install https://github.com/mvdan/sh/releases
-
 
 def _jdk(cfg):
     cfg.deps_java_dir.mkdir(parents=True, exist_ok=True)
@@ -135,8 +133,8 @@ def _jars(cfg):
 
 
 def _editor(cfg):
+    tmp_editor_dir = Path(cfg.tmp_dir, "editor")
     if not len(os.listdir(cfg.deps_editor_dir)) > 1:
-        tmp_editor_dir = Path(cfg.tmp_dir, "editor")
         tmp_editor_dir.mkdir(parents=True, exist_ok=True)
         fil = Path(tmp_editor_dir, cfg.editor_url.split("/")[-1])
 
@@ -160,5 +158,20 @@ def _editor(cfg):
             with open(cfg.shfmt_bin, "wb") as f:
                 shutil.copyfileobj(r.raw, f)
 
-    if os.name == "posix" and cfg.shfmt_bin.is_file():
-        os.chmod(cfg.shfmt_bin, os.stat(cfg.shfmt_bin).st_mode | 0o100)
+        if os.name == "posix" and cfg.shfmt_bin.is_file():
+            os.chmod(cfg.shfmt_bin, os.stat(cfg.shfmt_bin).st_mode | 0o100)
+
+    if not cfg.fzf_bin.is_file():
+        tmp_file = Path(tmp_editor_dir, cfg.fzf_url.split("/")[-1])
+
+        if not tmp_file.is_file():
+            gui.print_msg("Downloading " + cfg.fzf_bin.name + " from " + cfg.fzf_url, style=gui.style.info)
+
+            tmp_editor_dir.mkdir(parents=True, exist_ok=True)
+            with requests.get(cfg.fzf_url, stream=True) as r:
+                with open(tmp_file, "wb") as f:
+                    shutil.copyfileobj(r.raw, f)
+
+            result = shutil.unpack_archive(tmp_file, Path(cfg.fzf_bin.parent.absolute()))
+            if not result:
+                tmp_file.unlink()
