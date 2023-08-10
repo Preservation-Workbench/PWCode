@@ -27,30 +27,38 @@ class Config:  # TODO: Get some values from config file!
     base_dir: Path
     src_dir: Path
     deps_python_dir: Path
-    tmp_dir: Path = None
-    deps_java_dir: Path = None
-    deps_jar_dir: Path = None
-    deps_editor_dir: Path = None
-    shfmt_bin: Path = None
+    # tmp_dir: Path = None
+    # deps_java_dir: Path = None
+    # deps_jar_dir: Path = None
+    # deps_editor_dir: Path = None
+    # shfmt_bin: Path = None
+    # rg_bin: Path = None
     editor_url: str = "https://github.com/zyedidia/micro/releases/download/v2.0.11/micro-2.0.11-linux64.tar.gz"
     shfmt_url: str = "https://github.com/mvdan/sh/releases/download/v3.7.0/shfmt_v3.7.0_linux_amd64"
+    rg_url: str = "https://github.com/BurntSushi/ripgrep/releases/download/13.0.0/ripgrep-13.0.0-x86_64-unknown-linux-musl.tar.gz"
     fzf_url: str = "https://github.com/junegunn/fzf/releases/download/0.42.0/fzf-0.42.0-linux_amd64.tar.gz"
     java_version: str = "11"
 
     def __post_init__(self):
-        self.deps_java_dir = Path(self.base_dir, "deps", "java.linux")
-        self.deps_jar_dir = Path(self.base_dir, "deps", "jars")
-        self.deps_editor_dir = Path(self.base_dir, "deps", "editor")
-        self.shfmt_bin = Path(self.deps_editor_dir, "deps", "shfmt")
-        self.fzf_bin = Path(self.deps_editor_dir, "deps", "fzf")
-        self.tmp_dir = Path(self.base_dir, "projects", "tmp")
+        self.tmp_dir: Path = Path(self.base_dir, "projects", "tmp")
+        self.deps_java_dir: Path = Path(self.base_dir, "deps", "java.linux")
+        self.deps_jar_dir: Path = Path(self.base_dir, "deps", "jars")
+        self.deps_editor_dir: Path = Path(self.base_dir, "deps", "editor")
+        self.editor_bin: Path = Path(self.deps_editor_dir, "micro")
+        self.shfmt_bin: Path = Path(self.deps_editor_dir, "deps", "shfmt")
+        self.fzf_bin: Path = Path(self.deps_editor_dir, "deps", "fzf")
+        self.rg_bin: Path = Path(self.deps_editor_dir, "deps", "rg")
+
         if os.name != "posix":
-            self.editor_url: str = "https://github.com/zyedidia/micro/releases/download/v2.0.11/micro-2.0.11-win64.zip"
-            self.deps_java_dir: Path = Path(self.base_dir, "deps", "java.windows")
-            self.shfmt_url: str = "https://github.com/mvdan/sh/releases/download/v3.7.0/shfmt_v3.7.0_windows_amd64.exe"
-            self.fzf_url: str = "https://github.com/junegunn/fzf/releases/download/0.42.0/fzf-0.42.0-windows_amd64.zip"
+            self.editor_url = "https://github.com/zyedidia/micro/releases/download/v2.0.11/micro-2.0.11-win64.zip"
+            self.deps_java_dir = Path(self.base_dir, "deps", "java.windows")
+            self.shfmt_url = "https://github.com/mvdan/sh/releases/download/v3.7.0/shfmt_v3.7.0_windows_amd64.exe"
+            self.rg_url = "https://github.com/BurntSushi/ripgrep/releases/download/13.0.0/ripgrep-13.0.0-x86_64-pc-windows-msvc.zip"
+            self.fzf_url = "https://github.com/junegunn/fzf/releases/download/0.42.0/fzf-0.42.0-windows_amd64.zip"
+            self.editor_bin = Path(self.deps_editor_dir, "micro.exe")
             self.shfmt_bin = Path(self.deps_editor_dir, "deps", "shfmt.exe")
             self.fzf_bin = Path(self.deps_editor_dir, "deps", "fzf.exe")
+            self.rg_bin: Path = Path(self.deps_editor_dir, "deps", "rg.exe")
 
 
 def install(base_dir, src_dir, deps_python_dir):

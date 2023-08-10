@@ -136,20 +136,24 @@ def _editor(cfg):
     tmp_editor_dir = Path(cfg.tmp_dir, "editor")
     if not len(os.listdir(cfg.deps_editor_dir)) > 1:
         tmp_editor_dir.mkdir(parents=True, exist_ok=True)
-        fil = Path(tmp_editor_dir, cfg.editor_url.split("/")[-1])
+        tmp_file = Path(tmp_editor_dir, cfg.editor_url.split("/")[-1])
 
-        if not fil.is_file():
-            gui.print_msg("Downloading " + fil.name + " from " + cfg.edit_url, style=gui.style.info)
+        if not tmp_file.is_file():
+            gui.print_msg("Downloading " + tmp_file.name + " from " + cfg.edit_url, style=gui.style.info)
 
             with requests.get(cfg.edit_url, stream=True) as r:
-                with open(fil, "wb") as f:
+                with open(tmp_file, "wb") as f:
                     shutil.copyfileobj(r.raw, f)
 
-        shutil.unpack_archive(fil, tmp_editor_dir)
+        shutil.unpack_archive(tmp_file, tmp_editor_dir)
         sub_dirs = [x for x in tmp_editor_dir.iterdir() if x.is_dir()]
         if sub_dirs:
             shutil.copytree(sub_dirs[0], cfg.deps_editor_dir, dirs_exist_ok=True)
             shutil.rmtree(tmp_editor_dir)
+
+        if not cfg.edit_bin.is_file():
+            gui.print_msg("Error on installing " + cfg.edit_bin, style=gui.style.warning)
+            sys.exit()
 
     if not cfg.shfmt_bin.is_file():
         gui.print_msg("Downloading " + cfg.shfmt_bin.name + " from " + cfg.shfmt_url, style=gui.style.info)
@@ -158,20 +162,56 @@ def _editor(cfg):
             with open(cfg.shfmt_bin, "wb") as f:
                 shutil.copyfileobj(r.raw, f)
 
-        if os.name == "posix" and cfg.shfmt_bin.is_file():
-            os.chmod(cfg.shfmt_bin, os.stat(cfg.shfmt_bin).st_mode | 0o100)
+        if not cfg.shfmt_bin.is_file():
+            gui.print_msg("Error on installing " + cfg.shfmt_bin, style=gui.style.warning)
+            sys.exit()
+        else:
+            if os.name == "posix":
+                os.chmod(cfg.shfmt_bin, os.stat(cfg.shfmt_bin).st_mode | 0o100)
 
     if not cfg.fzf_bin.is_file():
+        gui.print_msg("Downloading " + cfg.fzf_bin.name + " from " + cfg.fzf_url, style=gui.style.info)
+
         tmp_file = Path(tmp_editor_dir, cfg.fzf_url.split("/")[-1])
+        tmp_editor_dir.mkdir(parents=True, exist_ok=True)
 
-        if not tmp_file.is_file():
-            gui.print_msg("Downloading " + cfg.fzf_bin.name + " from " + cfg.fzf_url, style=gui.style.info)
+        with requests.get(cfg.fzf_url, stream=True) as r:
+            with open(tmp_file, "wb") as f:
+                shutil.copyfileobj(r.raw, f)
 
-            tmp_editor_dir.mkdir(parents=True, exist_ok=True)
-            with requests.get(cfg.fzf_url, stream=True) as r:
-                with open(tmp_file, "wb") as f:
-                    shutil.copyfileobj(r.raw, f)
+        result = shutil.unpack_archive(tmp_file, Path(cfg.fzf_bin.parent.absolute()))
+        if result:
+            gui.print_msg(result, style=gui.style.warning)
+            sys.exit()
+        else:
+            tmp_file.unlink()
 
-            result = shutil.unpack_archive(tmp_file, Path(cfg.fzf_bin.parent.absolute()))
-            if not result:
-                tmp_file.unlink()
+    if not cfg.rg_bin.is_file():
+        gui.print_msg("Downloading " + cfg.rg_bin.name + " from " + cfg.rg_url, style=gui.style.info)
+
+        tmp_file = Path(tmp_editor_dir, cfg.rg_url.split("/")[-1])
+        tmp_editor_dir.mkdir(parents=True, exist_ok=True)
+
+        with requests.get(cfg.rg_url, stream=True) as r:
+            with open(tmp_file, "wb") as f:
+                shutil.copyfileobj(r.raw, f)
+
+        shutil.unpack_archive(tmp_file, tmp_editor_dir)
+        sub_dirs = [x for x in tmp_editor_dir.iterdir() if x.is_dir()]
+        if sub_dirs:
+            shutil.copytree(sub_dirs[0], Path(cfg.rg_bin.parent.absolute()), dirs_exist_ok=True)
+            shutil.rmtree(tmp_editor_dir)
+
+        if not cfg.rg_bin.is_file():
+            gui.print_msg("Error on installing " + cfg.rg_bin, style=gui.style.warning)
+            sys.exit()
+
+        # result = shutil.unpack_archive(tmp_file, Path(cfg.rg_bin.parent.absolute()))
+        # result = shutil.unpack_archive(tmp_file, tmp_editor_dir)
+        # if result:
+        # gui.print_msg(result, style=gui.style.warning)
+        # sys.exit()
+        # else:
+        # tmp_file.unlink()
+
+        # shutil.rmtree(tmp_editor_dir)

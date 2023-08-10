@@ -45,11 +45,11 @@ class Main:
     jdbc_drivers: dict
     jar_files: list
     config_db: sqlite_utils.db.Database = None
-    pwxtract_dir: Path = Path(__file__).resolve().parents[1]
-    projects_dir: Path = Path(pwxtract_dir, "projects")
-    editor: Path = Path(pwxtract_dir, "deps", "editor", "micro")
-    java_home: Path = Path(pwxtract_dir, "deps", "java." + jdk.OS)
-    jars_dir: Path = Path(pwxtract_dir, "deps", "jars")
+    pwcode_dir: Path = Path(__file__).resolve().parents[1]
+    projects_dir: Path = Path(pwcode_dir, "projects")
+    editor: Path = Path(pwcode_dir, "deps", "editor", "micro")
+    java_home: Path = Path(pwcode_dir, "deps", "java." + jdk.OS)
+    jars_dir: Path = Path(pwcode_dir, "deps", "jars")
 
     def __post_init__(self):
         if jdk.OS == "windows":

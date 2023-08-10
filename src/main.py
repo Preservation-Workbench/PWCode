@@ -92,7 +92,7 @@ def get_args(argv):
 
     # Main:
     parser = ArgumentParser(
-        prog="pwetl",
+        prog="pwcode",
         add_help=False,
         description="Program to copy, export and normalize data. Run subcommands for more information.",
         formatter_class=RawTextRichHelpFormatter,
@@ -117,7 +117,7 @@ def get_args(argv):
             "  ddl:    SQL code generated from JSON schema to recreate source schema.\n",
             "  copy:   Generated statements for copying data from source to target.\n",
             "\nExample of usage:\n",
-            '  pwetl copy --source "jdbc:sqlite:/home/pwb/source.db" --target "jdbc:sqlite:/home/pwb/target.db"\n',
+            '  pwcode copy --source "jdbc:sqlite:/home/pwb/source.db" --target "jdbc:sqlite:/home/pwb/target.db"\n',
         )),
         formatter_class=RawTextRichHelpFormatter,
         parents=[common_parser],
@@ -357,7 +357,7 @@ def run(argv):
     # TODO: Endre export/import av excel mm til sqlwb? https://www.sql-workbench.eu/manual/command-import.html#spreadsheet-import
     # TODO: Lag export_tsv tilsvarende export_xlsx og bruk nå command er archive (eller valg under copy?->senere)
     # --> Se om jdbc til csv kode i lwetl -> er for csv, xml, xlsx mm -> sjekk også blob-håndtering! -> se extract-images.py
-    # --> pwetl archive --source "jdbc:sqlite:/home/pwb/source.db" --target <project_name> --debug --stop ddl
+    # --> pwcode archive --source "jdbc:sqlite:/home/pwb/source.db" --target <project_name> --debug --stop ddl
 
     # TODO: Kalle --tables for --filter heller og liste opp filer hvis ikke db-source?
     # -> endre get_include_tables til def filter_source og håndter filer i tilleg til db
@@ -369,7 +369,7 @@ def run(argv):
     # TODO: Kan en gjøre pip install PWConvert heller enn subrepo? -> test
 
     # TODO: lag kode for kopiering av filer i mappe som ikke har database -> Lage json schema også for filuttrekk?
-    # --> Flytte get_checksum hvor? -> må kutte bruk av common for å splitte ut PWETL til eget repo
+    # --> Flytte get_checksum hvor? -> må kutte bruk av common for å splitte ut pwcode til eget repo
 
     # Konverter alle tabulære filer til tsv og så åpne de som virtuelle tabeller i SQLite? -> trengs extension til sqlite da?
 
@@ -377,8 +377,8 @@ def run(argv):
 
     # TODO: Ha kun en add_foreign_keys pr table (så ikke oppretter ny tabell flere ganger enn nødvendig)
 
-    # TODO: Definere projects mappe hvordan så PWETL kan kjøres uten pwtext? -> pwetl-repo til pwtext-repo senere?->ja
-    # Git init og kopier inn filer fra pwetl
+    # TODO: Definere projects mappe hvordan så pwcode kan kjøres uten pwtext? -> pwcode-repo til pwtext-repo senere?->ja
+    # Git init og kopier inn filer fra pwcode
     # Flytt arkivpakkestruktur til readme.md. Ha egen todo.md også?
 
     # TODO: Definer std farger mm for heading, info, error mm i gui
@@ -388,7 +388,7 @@ def run(argv):
 
     # TODO: Lag egen tabell import _files for å kunne forbedre ensure_tables_from_files import_files i _sqlite
 
-    # TODO: Splitt ut og gjøre PWETL public i påvente av vpn og git-server på adm og sikker sone
+    # TODO: Splitt ut og gjøre pwcode public i påvente av vpn og git-server på adm og sikker sone
 
     # TODO: Se i Joplin mail og markdown etter kode for SQLite til tsv (eller helst jdbc til tsv så støtter alle?). Mail og?
 

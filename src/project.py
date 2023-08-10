@@ -38,7 +38,7 @@ def confirm(cfg):
                 "log_dir",
                 "jars_dir",
                 "data_dir",
-                "pwxtract_dir",
+                "pwconfig_dir",
                 "java_home",
                 "projects_dir",
                 "target_name",

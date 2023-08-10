@@ -61,10 +61,10 @@ def show(cfg, obj, exit=True, error=False):
         obj = stdout_file
 
     env = os.environ.copy()
-    env["PYTHONPATH"] = str(Path(cfg.pwxtract_dir, "deps", "python"))
+    env["PYTHONPATH"] = str(Path(cfg.pwcode_dir, "deps", "python"))
     paths = [
-        str(Path(cfg.pwxtract_dir, "deps", "python", "bin")),
-        str(Path(cfg.pwxtract_dir, "deps", "editor", "deps"))
+        str(Path(cfg.pwcode_dir, "deps", "python", "bin")),
+        str(Path(cfg.pwcode_dir, "deps", "editor", "deps"))
     ]
     for path in paths:
         env["PATH"] = path + os.pathsep + env["PATH"]
