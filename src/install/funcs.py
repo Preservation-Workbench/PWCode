@@ -205,13 +205,3 @@ def _editor(cfg):
         if not cfg.rg_bin.is_file():
             gui.print_msg("Error on installing " + cfg.rg_bin, style=gui.style.warning)
             sys.exit()
-
-        # result = shutil.unpack_archive(tmp_file, Path(cfg.rg_bin.parent.absolute()))
-        # result = shutil.unpack_archive(tmp_file, tmp_editor_dir)
-        # if result:
-        # gui.print_msg(result, style=gui.style.warning)
-        # sys.exit()
-        # else:
-        # tmp_file.unlink()
-
-        # shutil.rmtree(tmp_editor_dir)

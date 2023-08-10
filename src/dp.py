@@ -140,9 +140,11 @@ def write_table(engine, schema, args, fk, *, table_name):
 
 
 def create_schema(cfg, changed, tables=[], schema_path=None):
+    if schema_path is None:
+        schema_path = Path(cfg.content_dir, "datapackage.json")
+
     if len(tables) == 0:
         target_name = cfg.target_name
-        schema_path = cfg.schema_path
     else:
         target_name = "partial"
 
