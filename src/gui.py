@@ -62,10 +62,10 @@ def show(cfg, obj, exit=True, error=False):
 
     env = os.environ.copy()
     env["PYTHONPATH"] = str(Path(cfg.pwcode_dir, "deps", "python"))
-    paths = [
-        str(Path(cfg.pwcode_dir, "deps", "python", "bin")),
-        str(Path(cfg.pwcode_dir, "deps", "editor", "deps"))
-    ]
+    env["COLORTERM"] = "truecolor"
+    env["MICRO_TRUECOLOR"] = "1"
+
+    paths = [str(Path(cfg.pwcode_dir, "deps", "python", "bin")), str(Path(cfg.pwcode_dir, "deps", "editor", "deps"))]
     for path in paths:
         env["PATH"] = path + os.pathsep + env["PATH"]
 

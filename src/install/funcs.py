@@ -152,7 +152,7 @@ def _editor(cfg):
             shutil.rmtree(tmp_editor_dir)
 
         if not cfg.edit_bin.is_file():
-            gui.print_msg("Error on installing " + cfg.edit_bin, style=gui.style.warning)
+            gui.print_msg("Error on installing " + str(cfg.edit_bin), style=gui.style.warning)
             sys.exit()
 
     if not cfg.shfmt_bin.is_file():
@@ -163,7 +163,7 @@ def _editor(cfg):
                 shutil.copyfileobj(r.raw, f)
 
         if not cfg.shfmt_bin.is_file():
-            gui.print_msg("Error on installing " + cfg.shfmt_bin, style=gui.style.warning)
+            gui.print_msg("Error on installing " + str(cfg.shfmt_bin), style=gui.style.warning)
             sys.exit()
         else:
             if os.name == "posix":
@@ -184,7 +184,7 @@ def _editor(cfg):
             gui.print_msg(result, style=gui.style.warning)
             sys.exit()
         else:
-            tmp_file.unlink()
+            shutil.rmtree(tmp_editor_dir)
 
     if not cfg.rg_bin.is_file():
         gui.print_msg("Downloading " + cfg.rg_bin.name + " from " + cfg.rg_url, style=gui.style.info)
@@ -200,8 +200,32 @@ def _editor(cfg):
         sub_dirs = [x for x in tmp_editor_dir.iterdir() if x.is_dir()]
         if sub_dirs:
             shutil.copytree(sub_dirs[0], Path(cfg.rg_bin.parent.absolute()), dirs_exist_ok=True)
-            shutil.rmtree(tmp_editor_dir)
 
         if not cfg.rg_bin.is_file():
-            gui.print_msg("Error on installing " + cfg.rg_bin, style=gui.style.warning)
+            gui.print_msg("Error on installing " + str(cfg.rg_bin), style=gui.style.warning)
             sys.exit()
+        else:
+            shutil.rmtree(tmp_editor_dir)
+
+    if not cfg.ctags_bin.is_file():
+        gui.print_msg("Downloading " + cfg.ctags_bin.name + " from " + cfg.ctags_url, style=gui.style.info)
+
+        tmp_file = Path(tmp_editor_dir, cfg.ctags_url.split("/")[-1])
+        tmp_editor_dir.mkdir(parents=True, exist_ok=True)
+
+        with requests.get(cfg.ctags_url, stream=True) as r:
+            with open(tmp_file, "wb") as f:
+                shutil.copyfileobj(r.raw, f)
+
+        shutil.unpack_archive(tmp_file, tmp_editor_dir)
+        sub_dirs = [x for x in tmp_editor_dir.iterdir() if x.is_dir()]
+        if sub_dirs:
+            bin_dir = Path(sub_dirs[0], "bin")
+            if bin_dir.is_dir():
+                shutil.copytree(bin_dir, Path(cfg.ctags_bin.parent.absolute()), dirs_exist_ok=True)
+
+        if not cfg.ctags_bin.is_file():
+            gui.print_msg("Error on installing " + str(cfg.ctags_bin), style=gui.style.warning)
+            sys.exit()
+        else:
+            shutil.rmtree(tmp_editor_dir)

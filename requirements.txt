@@ -1,5 +1,4 @@
 blake3
-specific_import
 psutil
 toposort
 flake8

@@ -5,6 +5,15 @@ local config = import("micro/config")
 local buffer = import("micro/buffer")
 local shell = import("micro/shell")
 
+function findTodo(bp)
+    local match, found, err = bp.Buf:FindNext("TODO", bp.Buf:Start(), bp.Buf:End(), -bp.Cursor.Loc, true, false)
+    if err == nil and found then
+        bp.Cursor:GotoLoc(match[1])
+        bp.Cursor:SelectWord()
+        bp:Relocate()
+    end
+end
+
 local function log(args)
   -- for debugging; use micro -debug, and then inspect log.txt
   local info = args.info
@@ -49,7 +58,7 @@ end
 
 -- function init()
    -- -- bindings
--- 
+--
   -- config.TryBindKey(
     -- '\u003cCtrl-n\u003e\u003cCtrl-d\u003e',  -- <Ctrl-n><Ctrl-d>
     -- 'VSplit',
@@ -70,9 +79,9 @@ end
     -- 'lua:initlua.HSplitUp',
     -- false                                    -- overwrite=false
   -- )
--- 
+--
   -- config.TryBindKey('Alt-|', 'lua:initlua.NewView', false)  -- overwrite=false
--- 
+--
   -- linter.makeLinter(
     -- 'flake8-cached',
     -- 'python',
@@ -92,7 +101,7 @@ end
     -- },
     -- '%f:%l:%c %m'
   -- )
--- 
+--
   -- linter.removeLinter('yaml')
   -- linter.makeLinter('yaml', 'yaml', 'yamllint', {'--format', 'parsable', '%f'}, '%f:%l:%c:%m')
 -- end

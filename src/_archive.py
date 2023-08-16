@@ -138,7 +138,7 @@ def validate_tables(deps_list, table_deps, archived_tables, cfg):
     if len(deps_list) == 0 or all(item in validated_tables for item in deps_list):
         return 0, validated_tables, deps_list
 
-    gui.print_msg("Validating dependent tables againsts datapackage schema...", style=gui.style.info)
+    gui.print_msg("Validating dependent tables against datapackage schema...", style=gui.style.info)
 
     schema_path = Path(cfg.source.parent, "partial_datapackage.json")
     report = validate(dp.create_schema(cfg, True, tables=deps_list, schema_path=schema_path))
@@ -240,8 +240,7 @@ def archive_db(source, main_cfg):
                     archived_tables.append(table.custom["db_table_name"])
                     continue
             else:
-                if table.name in validated_tables:
-                    cfg.config_db["tables"].update(table.custom["db_table_name"], {"validated": 0})
+                cfg.config_db["tables"].update(table.custom["db_table_name"], {"validated": 0})
 
             gui.print_msg(
                 "Writing '" + table.path + "' (" + table.custom["count_of_rows"] + " rows)...",

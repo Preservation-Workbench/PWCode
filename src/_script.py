@@ -15,11 +15,15 @@
 
 from pathlib import Path
 from dataclasses import replace
-
-from specific_import import import_file
+import importlib
+import gui
 
 
 def run(main_cfg):
     cfg = replace(main_cfg, **{"script_path": Path(main_cfg.script_path).resolve()})
-    script = import_file(str(cfg.script_path))
-    script.run(cfg)
+
+    if cfg.script_path.parent.resolve() == cfg.scripts_dir.resolve():
+        script = importlib.import_module(cfg.script_path.stem)
+        script.run(cfg)
+    else:
+        gui.print_msg("Script file must be in script directory!", style=gui.style.warning)

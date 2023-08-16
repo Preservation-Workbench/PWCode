@@ -170,7 +170,7 @@ def get_args(argv):
     script_parser = subparsers.add_parser(
         "script",
         add_help=False,
-        description="Run custom python script.",
+        description="Run custom python code in scripts directory.",
         formatter_class=RawTextRichHelpFormatter,
         parents=[common_parser],
     )

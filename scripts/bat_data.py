@@ -52,7 +52,7 @@ def find_dupes(field, db):
 def run(main_cfg):
     """
     Run from cli like this:
-    On Linux: ./pwcode.sh script --path pwcode/examples/bat_data.py
+    On Linux: ./pwcode script --path scripts/bat_data.py
     """
 
     # COPY DATA:

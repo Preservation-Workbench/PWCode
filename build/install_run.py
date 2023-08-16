@@ -21,9 +21,11 @@ from pathlib import Path
 base_dir = Path(os.environ["PYAPP"]).parent.absolute()
 src_dir = Path(base_dir, "src")
 deps_python_dir = Path(base_dir, "deps", "python")
+scripts_dir = Path(base_dir, "scripts")
 
-site.addsitedir(src_dir)
-site.addsitedir(deps_python_dir)
+site_dirs = [src_dir, deps_python_dir, scripts_dir]
+for s_dir in site_dirs:
+    site.addsitedir(s_dir)
 
 # INSTALL:
 from install import run  # noqa: E402

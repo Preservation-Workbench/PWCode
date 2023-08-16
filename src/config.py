@@ -50,6 +50,7 @@ class Main:
     editor: Path = Path(pwcode_dir, "deps", "editor", "micro")
     java_home: Path = Path(pwcode_dir, "deps", "java." + jdk.OS)
     jars_dir: Path = Path(pwcode_dir, "deps", "jars")
+    scripts_dir: Path = Path(pwcode_dir, "scripts")
 
     def __post_init__(self):
         if jdk.OS == "windows":

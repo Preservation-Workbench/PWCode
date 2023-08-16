@@ -1,7 +1,10 @@
 {
     "Alt-/": "lua:comment.comment",
     "Alt-Backspace": "DeleteWordLeft",
+    "Alt-Ctrl-Space": "command:palettero",
     "Alt-Down": "MoveLinesDown",
+    "Alt-R": "command:shrink",
+    "Alt-T": "command:grow",
     "Alt-Up": "MoveLinesUp",
     "Alt-c": "lua:comment.comment",
     "Alt-d": "command:definition",
@@ -10,7 +13,6 @@
     "Alt-r": "command:references",
     "Alt-s": "SaveAs",
     "Alt-x": "CommandMode",
-    "Alt-Ctrl-Space": "command:palettero",
     "Backspace": "Backspace",
     "Backtab": "OutdentSelection|OutdentLine",
     "Ctrl-End": "CursorEnd",
@@ -25,6 +27,7 @@
     "Ctrl-a": "SelectAll",
     "Ctrl-b": "JumpToMatchingBrace",
     "Ctrl-c": "CopyLine|Copy",
+    "Ctrl-d": "lua:initlua.NewView",
     "Ctrl-f": "FindLiteral",
     "Ctrl-g": "command-edit:goto ",
     "Ctrl-n": "AddTab,OpenFile",
@@ -38,7 +41,6 @@
     "Ctrl-x": "Cut",
     "Ctrl-y": "Redo",
     "Ctrl-z": "Undo",
-    "Ctrl-d": "lua:initlua.NewView",
     "Delete": "Delete",
     "Down": "CursorDown",
     "End": "EndOfLine",
@@ -126,9 +128,9 @@
         "Up": "HistoryUp"
     },
     "terminal": {
-      "<Ctrl-w><Ctrl-w>": "Exit",
-      "Ctrl-t": "Exit",      
-      "Esc": "Exit",
-      "<Ctrl-PageUp>": "NextSplit",
+        "\u003cCtrl-PageUp\u003e": "NextSplit",
+        "\u003cCtrl-w\u003e\u003cCtrl-w\u003e": "Exit",
+        "Ctrl-t": "Exit",
+        "Esc": "Exit"
     }
 }
