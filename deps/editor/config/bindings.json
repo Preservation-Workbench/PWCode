@@ -47,6 +47,7 @@
     "Enter": "InsertNewline",
     "Esc": "Escape",
     "F1": "command:cheat",
+    "F12": "command:showdec",
     "F2": "FindPrevious",
     "F3": "FindNext",
     "Home": "StartOfTextToggle",
