@@ -2,10 +2,10 @@ blake3
 psutil
 toposort
 flake8
-autopep8
-rope
+# autopep8
+# rope
 rich-argparse
-cchardet
+# cchardet
 openpyxl
 sqlalchemy==1.4.32
 command_runner==1.4.0
@@ -14,8 +14,8 @@ jpype1==1.4.0
 JayDeBeApi==1.2.3
 sqlite-utils
 PyYAML==6.0
-typing-extensions
-pipgrip
+# typing-extensions
+# pipgrip
 frictionless[sql] --pre
 cryptography>=36.0.0
 install-jdk

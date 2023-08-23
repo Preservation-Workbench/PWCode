@@ -18,6 +18,7 @@ import sys
 import shutil
 import subprocess
 from pathlib import Path
+
 import jdk
 import gui
 from maven_artifact import Downloader
@@ -26,10 +27,11 @@ import requests
 
 
 def _jdk(cfg):
-    cfg.deps_java_dir.mkdir(parents=True, exist_ok=True)
-    Path(cfg.deps_java_dir, ".gitkeep").touch(exist_ok=True)
+    if not Path(cfg.deps_java_dir, "bin", "java").is_file():
 
-    if len(os.listdir(cfg.deps_java_dir)) == 1:
+        if cfg.deps_java_dir.is_dir():
+            shutil.rmtree(cfg.deps_java_dir)
+
         jdk_tmp_true = [x for x in cfg.tmp_dir.iterdir() if x.is_dir() and x.name.startswith("jdk-" + cfg.java_version)]
         if not jdk_tmp_true:
             gui.print_msg("Downloading java jdk...", style=gui.style.info)
@@ -59,28 +61,33 @@ def _jdk(cfg):
             "jdk.zipfs",
         ]
 
-        proc = subprocess.Popen(
-            [
-                str(jlink),
-                "--no-header-files",
-                "--no-man-pages",
-                "--compress=2",
-                "--strip-debug",
-                "--add-modules",
-                ",".join(modules),
-                "--output",
-                str(cfg.deps_java_dir),
-            ],
+        cmd = [
+            str(jlink),
+            "--no-header-files",
+            "--no-man-pages",
+            "--compress=2",
+            "--strip-debug",
+            "--add-modules",
+            ",".join(modules),
+            "--output",
+            str(cfg.deps_java_dir),
+        ]
+
+        subprocess.call(
+            cmd,
             stdout=subprocess.DEVNULL,
             stderr=subprocess.PIPE,
             universal_newlines=True,
         )
-        result = proc.communicate()[1]
-        if "Error:" in result:
-            gui.print_msg(result, style=gui.style.warning)
+
+        if not Path(cfg.deps_java_dir, "bin", "java").is_file():
+            gui.print_msg("Error on installing JDK", style=gui.style.warning)
             sys.exit()
         else:
             shutil.rmtree(jdk_tmp_dir)
+
+        cfg.deps_java_dir.mkdir(parents=True, exist_ok=True)
+        Path(cfg.deps_java_dir, ".gitkeep").touch(exist_ok=True)
 
 
 def _jars(cfg):

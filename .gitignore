@@ -1,6 +1,7 @@
 # Ignore directories and files
 __pycache__/
 *.py[co]
+*.sail
 config.yml
 config.yml.save
 pwcode
