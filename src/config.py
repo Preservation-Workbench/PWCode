@@ -22,6 +22,7 @@
 # SOFTWARE.
 
 import yaml
+import os
 from pathlib import Path
 from dataclasses import dataclass
 
@@ -31,7 +32,7 @@ import jdk
 
 
 @dataclass()
-class Main:
+class Main:  # TODO: Get some values from config file!
     cfg_file: Path
     command: str
     script_path: Path
@@ -45,16 +46,47 @@ class Main:
     jdbc_drivers: dict
     jar_files: list
     config_db: sqlite_utils.db.Database = None
-    pwcode_dir: Path = Path(__file__).resolve().parents[1]
+    pwcode_dir: Path = Path(os.getenv("pwcode_dir"))
+    tmp_dir: Path = Path(pwcode_dir, "projects", "tmp")
     projects_dir: Path = Path(pwcode_dir, "projects")
     editor: Path = Path(pwcode_dir, "deps", "editor", "micro")
     java_home: Path = Path(pwcode_dir, "deps", "java." + jdk.OS)
+    scripts_dir: Path = Path(os.getenv("pwcode_scripts_dir"))
+    src_dir: Path = Path(os.getenv("pwcode_src_dir"))
+    python_dir: Path = Path(os.getenv("pwcode_python_dir"))
+    editor_url: str = "https://github.com/zyedidia/micro/releases/download/v2.0.11/micro-2.0.11-linux64.tar.gz"
+    shfmt_url: str = "https://github.com/mvdan/sh/releases/download/v3.7.0/shfmt_v3.7.0_linux_amd64"
+    rg_url: str = "https://github.com/BurntSushi/ripgrep/releases/download/13.0.0/"\
+        "ripgrep-13.0.0-x86_64-unknown-linux-musl.tar.gz"
+    fzf_url: str = "https://github.com/junegunn/fzf/releases/download/0.42.0/fzf-0.42.0-linux_amd64.tar.gz"
+    ctags_url: str = "https://github.com/universal-ctags/ctags-nightly-build/releases/download/"\
+        "2023.08.13%2Bce46d93811faefaa75b87e334d768fbf9a831861/uctags-2023.08.13-linux-x86_64.tar.xz"
+    java_version: str = "11"
+    java_dir: Path = Path(pwcode_dir, "deps", "java.linux")
     jars_dir: Path = Path(pwcode_dir, "deps", "jars")
-    scripts_dir: Path = Path(pwcode_dir, "scripts")
+    editor_dir: Path = Path(pwcode_dir, "deps", "editor")
+    editor_bin: Path = Path(editor_dir, "micro")
+    shfmt_bin: Path = Path(editor_dir, "deps", "shfmt")
+    fzf_bin: Path = Path(editor_dir, "deps", "fzf")
+    rg_bin: Path = Path(editor_dir, "deps", "rg")
+    ctags_bin: Path = Path(editor_dir, "deps", "ctags")    
 
     def __post_init__(self):
         if jdk.OS == "windows":
             self.editor = Path(str(self.editor) + ".exe")
+            self.editor_url = "https://github.com/zyedidia/micro/releases/download/v2.0.11/micro-2.0.11-win64.zip"
+            self.java_dir = Path(self.pwcode_dir, "deps", "java.windows")
+            self.shfmt_url = "https://github.com/mvdan/sh/releases/download/v3.7.0/shfmt_v3.7.0_windows_amd64.exe"
+            self.rg_url = "https://github.com/BurntSushi/ripgrep/releases/download/"\
+                "13.0.0/ripgrep-13.0.0-x86_64-pc-windows-msvc.zip"
+            self.fzf_url = "https://github.com/junegunn/fzf/releases/download/0.42.0/fzf-0.42.0-windows_amd64.zip"
+            self.ctags_url = "https://github.com/universal-ctags/ctags-win32/releases/download/"\
+                "p6.0.20230813.0/ctags-p6.0.20230813.0-x64.zip"
+            self.editor_bin = Path(self.editor_dir, "micro.exe")
+            self.shfmt_bin = Path(self.editor_dir, "deps", "shfmt.exe")
+            self.fzf_bin = Path(self.editor_dir, "deps", "fzf.exe")
+            self.rg_bin: Path = Path(self.editor_dir, "deps", "rg.exe")
+            self.ctags_bin: Path = Path(self.editor_dir, "deps", "ctags.exe")
 
 
 @dataclass()
@@ -67,18 +99,11 @@ class Copy(Main):
     target_db_path: Path = None
     content_dir: Path = None
     data_dir: Path = None
-    tmp_dir: Path = None
     data_files_dir: Path = None
 
 
 @dataclass()
-class Edit(Main):
-    tmp_dir: Path = None
-
-
-@dataclass()
 class Archive(Main):
-    tmp_dir: Path = None
     schema_path: Path = None
     # target_type: str = None
     # project_dir: Path = None
@@ -87,7 +112,6 @@ class Archive(Main):
     # target_db_path: Path = None
     # content_dir: Path = None
     # data_dir: Path = None
-    # tmp_dir: Path = None
     # data_files_dir: Path = None
 
 

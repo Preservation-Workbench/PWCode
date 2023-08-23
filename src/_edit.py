@@ -20,5 +20,4 @@ import config
 
 
 def run(main_cfg):
-    cfg = config.Edit(**main_cfg.__dict__, tmp_dir=Path(main_cfg.projects_dir, "tmp"))
-    gui.show(cfg, Path(main_cfg.file_path).resolve())
+    gui.show(main_cfg, Path(main_cfg.file_path).resolve())

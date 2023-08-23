@@ -20,10 +20,15 @@ import site
 from pathlib import Path
 import subprocess
 
-base_dir = Path(os.environ["PYAPP"]).parent.absolute()
-src_dir = Path(base_dir, "src")
-deps_python_dir = Path(base_dir, "deps", "python")
-scripts_dir = Path(base_dir, "scripts")
+pwcode_dir = Path(os.environ["PYAPP"]).parent.absolute()
+src_dir = Path(pwcode_dir, "src")
+deps_python_dir = Path(pwcode_dir, "deps", "python")
+scripts_dir = Path(pwcode_dir, "scripts")
+
+os.environ['pwcode_dir'] = str(pwcode_dir)
+os.environ['pwcode_src_dir'] = str(src_dir)
+os.environ['pwcode_python_dir'] = str(deps_python_dir)
+os.environ['pwcode_scripts_dir'] = str(scripts_dir)
 
 deps_python_dir.mkdir(parents=True, exist_ok=True)
 Path(deps_python_dir, ".gitkeep").touch(exist_ok=True)
@@ -31,7 +36,7 @@ Path(deps_python_dir, ".gitkeep").touch(exist_ok=True)
 if len(os.listdir(deps_python_dir)) == 1:
     # rgb(138, 173, 244)
     print("\033[38;2;{};{};{}m{} \033[39m".format(138, 173, 244, "Installing python dependencies..."))
-    req_file = Path(base_dir, "requirements.txt")
+    req_file = Path(pwcode_dir, "requirements.txt")
     cmd = [sys.executable, "-m", "pip", "install", "--target", deps_python_dir, "-r", req_file]
     proc = subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, universal_newlines=True)
     result = proc.communicate()[1]

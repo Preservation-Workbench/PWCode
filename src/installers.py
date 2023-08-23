@@ -27,10 +27,10 @@ import requests
 
 
 def _jdk(cfg):
-    if not Path(cfg.deps_java_dir, "bin", "java").is_file():
+    if not Path(cfg.java_dir, "bin", "java").is_file():
 
-        if cfg.deps_java_dir.is_dir():
-            shutil.rmtree(cfg.deps_java_dir)
+        if cfg.java_dir.is_dir():
+            shutil.rmtree(cfg.java_dir)
 
         jdk_tmp_true = [x for x in cfg.tmp_dir.iterdir() if x.is_dir() and x.name.startswith("jdk-" + cfg.java_version)]
         if not jdk_tmp_true:
@@ -70,7 +70,7 @@ def _jdk(cfg):
             "--add-modules",
             ",".join(modules),
             "--output",
-            str(cfg.deps_java_dir),
+            str(cfg.java_dir),
         ]
 
         subprocess.call(
@@ -80,20 +80,20 @@ def _jdk(cfg):
             universal_newlines=True,
         )
 
-        if not Path(cfg.deps_java_dir, "bin", "java").is_file():
+        if not Path(cfg.java_dir, "bin", "java").is_file():
             gui.print_msg("Error on installing JDK", style=gui.style.warning)
             sys.exit()
         else:
             shutil.rmtree(jdk_tmp_dir)
 
-        cfg.deps_java_dir.mkdir(parents=True, exist_ok=True)
-        Path(cfg.deps_java_dir, ".gitkeep").touch(exist_ok=True)
+        cfg.java_dir.mkdir(parents=True, exist_ok=True)
+        Path(cfg.java_dir, ".gitkeep").touch(exist_ok=True)
 
 
 def _jars(cfg):
     dl = Downloader()
-    cfg.deps_jar_dir.mkdir(parents=True, exist_ok=True)
-    Path(cfg.deps_jar_dir, ".gitkeep").touch(exist_ok=True)
+    cfg.jars_dir.mkdir(parents=True, exist_ok=True)
+    Path(cfg.jars_dir, ".gitkeep").touch(exist_ok=True)
 
     jars = [
         "org.xerial:sqlite-jdbc:jar:3.42.0.0",
@@ -108,7 +108,7 @@ def _jars(cfg):
     for jar in jars:
         if jar.startswith("http"):
             url, file_check = jar.split("::")
-            if Path(cfg.deps_jar_dir, file_check).is_file():
+            if Path(cfg.jars_dir, file_check).is_file():
                 continue
 
             result = None
@@ -121,11 +121,11 @@ def _jars(cfg):
                         shutil.copyfileobj(r.raw, f)
 
             if fil.suffix == ".zip":
-                result = shutil.unpack_archive(fil, cfg.deps_jar_dir)
+                result = shutil.unpack_archive(fil, cfg.jars_dir)
                 if not result:
                     fil.unlink()
             else:
-                result = shutil.move(fil, Path(cfg.deps_jar_dir, url.split("/")[-1]))
+                result = shutil.move(fil, Path(cfg.jars_dir, url.split("/")[-1]))
 
             if result:
                 gui.print_msg(result, style=gui.style.warning)
@@ -134,14 +134,14 @@ def _jars(cfg):
             continue
 
         artifact = Artifact.parse(jar)
-        jar_file = Path(cfg.deps_jar_dir, artifact.artifact_id + "." + artifact.extension)
+        jar_file = Path(cfg.jars_dir, artifact.artifact_id + "." + artifact.extension)
         if not jar_file.is_file():
             dl.download(artifact, filename=jar_file)
 
 
 def _editor(cfg):
     tmp_editor_dir = Path(cfg.tmp_dir, "editor")
-    if not len(os.listdir(cfg.deps_editor_dir)) > 1:
+    if not len(os.listdir(cfg.editor_dir)) > 1:
         tmp_editor_dir.mkdir(parents=True, exist_ok=True)
         tmp_file = Path(tmp_editor_dir, cfg.editor_url.split("/")[-1])
 
@@ -155,7 +155,7 @@ def _editor(cfg):
         shutil.unpack_archive(tmp_file, tmp_editor_dir)
         sub_dirs = [x for x in tmp_editor_dir.iterdir() if x.is_dir()]
         if sub_dirs:
-            shutil.copytree(sub_dirs[0], cfg.deps_editor_dir, dirs_exist_ok=True)
+            shutil.copytree(sub_dirs[0], cfg.editor_dir, dirs_exist_ok=True)
             shutil.rmtree(tmp_editor_dir)
 
         if not cfg.edit_bin.is_file():

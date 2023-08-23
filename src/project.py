@@ -30,34 +30,16 @@ import _sqlite
 
 def confirm(cfg):
     for key, value in cfg.__dict__.items():
-        if key in (
-                # "target_schema",
-                "content_dir",
-                "tmp_dir",
-                "editor",
-                "log_dir",
-                "jars_dir",
-                "data_dir",
-                "pwconfig_dir",
-                "java_home",
-                "projects_dir",
-                "target_name",
-                "login_alias",
-                "jdbc_drivers",
-                "jar_files",
-                "config_db",
-                "cfg_file",
-                "source_db_path",
-        ):
+        if key not in ("source", "target", "data_files_dir", "target_db_path", "source_schema", "stop"):
             continue
 
         if key == "source" and type(cfg.source).__name__ == "Dbo":
-            value = cfg.source.url[cfg.source.url.rindex(":") + 1:]
+            value = cfg.source.url[cfg.source.url.rindex(":") + 1 :]
 
         if key == "target" and type(cfg.target).__name__ == "Dbo":
-            value = cfg.target.url[cfg.target.url.rindex(":") + 1:]
+            value = cfg.target.url[cfg.target.url.rindex(":") + 1 :]
 
-        if key == "data_files_dir" and value is None:
+        if key in ["data_files_dir", "stop"] and value is None:
             continue
 
         if cfg.source_type in ["files", "project"] and key == "target_db_path":
@@ -66,8 +48,11 @@ def confirm(cfg):
         if cfg.source_type in ["files", "project", "sqlite", "interbase"] and key == "source_schema":
             continue
 
-        if (cfg.source_type not in ["files", "project"] and cfg.target_type not in ["sqlite", "interbase"]
-                and key == "target_db_path"):
+        if (
+            cfg.source_type not in ["files", "project"]
+            and cfg.target_type not in ["sqlite", "interbase"]
+            and key == "target_db_path"
+        ):
             continue
 
         gui.print_msg(str(key) + ": " + str(value), style=gui.style.info, highlight=True)
@@ -150,12 +135,15 @@ def get(source, target, source_type, target_type, project_dir):
                 url = url.replace(i, "")
 
             if source_type == "oracle":
-                target_name = (sanitize_filename(re.sub(":.*?:", "",
-                                                        url.split("@")[-1].lower())) + "-" + source.schema.lower())
+                target_name = (
+                    sanitize_filename(re.sub(":.*?:", "", url.split("@")[-1].lower())) + "-" + source.schema.lower()
+                )
             else:
                 target_name = sanitize_filename(
-                    re.split("\\bjdbc:" + source_type + "://\\b", url)[-1].partition(":")[0].lower() + "-" +
-                    source.schema.lower())
+                    re.split("\\bjdbc:" + source_type + "://\\b", url)[-1].partition(":")[0].lower()
+                    + "-"
+                    + source.schema.lower()
+                )
 
         target_name = re.sub(r"[^A-Za-z0-9]", "", target_name)
 

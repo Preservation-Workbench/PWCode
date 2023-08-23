@@ -151,18 +151,10 @@ def get_copy_cfg(main_cfg):
 
     target_db_path, content_dir, target_name, data_dir, tmp_dir = project.get(source, target, source_type, target_type,
                                                                               project_dir)
-
-    main_cfg_values = {}
-    for key, value in main_cfg.__dict__.items():
-        if key in ["source", "target"]:
-            continue
-
-        main_cfg_values[key] = value
-
+    
+    main_cfg_values = main_cfg.__dict__ | {'source': source, 'target': target, 'tmp_dir': tmp_dir}        
     cfg = config.Copy(
         **main_cfg_values,
-        source=source,
-        target=target,
         source_type=source_type,
         target_type=target_type,
         project_dir=project_dir,
@@ -171,7 +163,6 @@ def get_copy_cfg(main_cfg):
         content_dir=content_dir,
         target_name=target_name,
         data_dir=data_dir,
-        tmp_dir=tmp_dir,
         data_files_dir=data_files_dir,
     )
 
