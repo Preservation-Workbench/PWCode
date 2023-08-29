@@ -16,7 +16,6 @@
 import sys
 from pathlib import Path
 import shutil
-import os
 from argparse import ArgumentParser, SUPPRESS
 
 from rich.traceback import install

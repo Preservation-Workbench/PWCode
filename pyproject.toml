@@ -1,0 +1,31 @@
+[project]
+name = "pwcode"
+version = "0.1"
+authors = [
+    {name = "Morten Eek", email = "mortenee@gmail.com"},
+]
+readme = "README.md"
+requires-python = ">=3.10"
+classifiers = ["License :: OSI Approved :: GNU General Public License v3 (GPLv3)"]
+
+dependencies = [
+	"blake3",
+	"psutil",
+	"toposort",
+	"flake8",
+	"rich-argparse",
+	"openpyxl",
+	"sqlalchemy==1.4.32",
+	"command_runner==1.4.0",
+	"pathvalidate",
+	"jpype1==1.4.0",
+	"JayDeBeApi==1.2.3",
+	"sqlite-utils",
+	"PyYAML==6.0",
+	"frictionless[sql]",
+	"cryptography>=36.0.0",
+	"install-jdk",
+	"maven-artifact",
+	"dulwich",
+	"yapf",
+]

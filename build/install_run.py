@@ -36,8 +36,7 @@ Path(deps_python_dir, ".gitkeep").touch(exist_ok=True)
 if len(os.listdir(deps_python_dir)) == 1:
     # rgb(138, 173, 244)
     print("\033[38;2;{};{};{}m{} \033[39m".format(138, 173, 244, "Installing python dependencies..."))
-    req_file = Path(pwcode_dir, "requirements.txt")
-    cmd = [sys.executable, "-m", "pip", "install", "--target", deps_python_dir, "-r", req_file]
+    cmd = [sys.executable, "-m", "pip", "install", str(pwcode_dir) + "/.", "--target", deps_python_dir]
     proc = subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, universal_newlines=True)
     result = proc.communicate()[1]
     if "ERROR:" in result:

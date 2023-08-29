@@ -151,8 +151,8 @@ def get_copy_cfg(main_cfg):
 
     target_db_path, content_dir, target_name, data_dir, tmp_dir = project.get(source, target, source_type, target_type,
                                                                               project_dir)
-    
-    main_cfg_values = main_cfg.__dict__ | {'source': source, 'target': target, 'tmp_dir': tmp_dir}        
+
+    main_cfg_values = main_cfg.__dict__ | {'source': source, 'target': target, 'tmp_dir': tmp_dir}
     cfg = config.Copy(
         **main_cfg_values,
         source_type=source_type,
