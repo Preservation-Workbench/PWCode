@@ -16,6 +16,7 @@
 import os
 import sys
 import runpy
+import tomllib
 import site
 from pathlib import Path
 import subprocess
@@ -34,14 +35,17 @@ deps_python_dir.mkdir(parents=True, exist_ok=True)
 Path(deps_python_dir, ".gitkeep").touch(exist_ok=True)
 
 if len(os.listdir(deps_python_dir)) == 1:
-    # rgb(138, 173, 244)
-    print("\033[38;2;{};{};{}m{} \033[39m".format(138, 173, 244, "Installing python dependencies..."))
-    cmd = [sys.executable, "-m", "pip", "install", str(pwcode_dir) + "/.", "--target", deps_python_dir]
-    proc = subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, universal_newlines=True)
-    result = proc.communicate()[1]
-    if "ERROR:" in result:
-        print("\033[38;2;{};{};{}m{} \033[39m".format(237, 135, 150, result))  # rgb(237, 135, 150)
-        sys.exit()
+    data = tomllib.load(open(Path(pwcode_dir, "pyproject.toml"), "rb"))
+    deps = data["project"].get("dependencies")
+    if deps:
+        # rgb(138, 173, 244)
+        print("\033[38;2;{};{};{}m{} \033[39m".format(138, 173, 244, "Installing python dependencies..."))
+        cmd = [sys.executable, "-m", "pip", "install", *deps, "--target", deps_python_dir]
+        proc = subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, universal_newlines=True)
+        result = proc.communicate()[1]
+        if "ERROR:" in result:
+            print("\033[38;2;{};{};{}m{} \033[39m".format(237, 135, 150, result))  # rgb(237, 135, 150)
+            sys.exit()
 
 site_dirs = [src_dir, deps_python_dir, scripts_dir]
 for s_dir in site_dirs:

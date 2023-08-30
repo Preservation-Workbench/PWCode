@@ -91,12 +91,13 @@ def get_archive_cfg(source, main_cfg):
 
         main_cfg_values[key] = value
 
-    cfg = config.Archive(**main_cfg_values,
-                         source=source,
-                         target=target,
-                         config_db=config_db,
-                         tmp_dir=tmp_dir,
-                         schema_path=schema_path)
+    main_cfg_values = main_cfg.__dict__ | {
+        'source': source,
+        'target': target,
+        'tmp_dir': tmp_dir,
+        'config_db': config_db
+    }
+    cfg = config.Archive(**main_cfg_values, schema_path=schema_path)
 
     return cfg
 
