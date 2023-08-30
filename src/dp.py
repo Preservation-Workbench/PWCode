@@ -150,8 +150,8 @@ def create_schema(cfg, changed, tables=[], schema_path=None):
 
     dialect = {
         "delimiter": "\t",
-        "quoteChar": "",
-        "escapeChar": "",
+        # "quoteChar": "",
+        # "escapeChar": "",
         "doubleQuote": False,
         "skipInitialSpace": False,
     }
