@@ -51,4 +51,4 @@ site_dirs = [src_dir, deps_python_dir, scripts_dir]
 for s_dir in site_dirs:
     site.addsitedir(s_dir)
 
-runpy.run_path(Path(src_dir, "main.py"), run_name="__main__")
+runpy.run_path(src_dir, run_name="__main__")

@@ -276,88 +276,36 @@ def run(argv):
     return cmds[main_cfg.command](main_cfg)
 
     # TODO:Tell antall linjer eksportert før validering heller enn antall tabeller!
-
-    # TODO: Fix at micro mener tables er åpnet i en scratch buffer samt shorcuts for å velge tabeller
-
-    # TODO: Kompilere helix som del av build? Med fix for glib?
-
-    # TODO: Egen install.py som kalles fra embedded kode heller enn å ha all install kode i embedded som nå
-
-    # TODO: For BKSAK: Trenger arg for copy på å utelate blob'er (til tekst-felt med ref som i archive da) -> gjør før bksak-uttrekk
-    # -> stopp etter generert copy statements for å sjekk hva som utelates da
-
     # TODO: Skriv original databasetype til JSON
-
-    # TODO: Zippet build til mappe release under mappe build?
-
-    # TODO: Endre til å bruke tmp_dir under projects direkte heller enn en pr project
-
+    # TODO: Endre til å bruke tmp_dir under projects direkte heller enn en pr project?
     # TODO: Maven bør også hentes fra config heller enn å være angitt direkte i koden
-
     # TODO: Er raskere å slette opprinnelig kopiert tabell i sqlite som har constraints og så kopiere den på nytt enn å bruke sqlite_utils til å legge på fk!!!!
-
     # TODO: test for å få stdout/err fra jpype: https://github.com/search?q=repo%3Ajpype-project%2Fjpype%20%20contextlib&type=code
-
-    # TODO: Hvis linebreaks i kolonne skal eksporteres som fil alltid? Flere kriterier?
-
     # TODO: Sjekk hvilken databaser som slipper inn null bytes . Bare fjern når original db tillater
-
     # TODO: Bruke denne så får sqlite med extensions? https://simonwillison.net/2023/Jun/17/sqleanpy/
-
-    # TODO: Test til tsv hele base -> var det ikke felt som skulle skrives som filer til disk? -> test med annen base hvis ikke
-    # -> sjekk først smvprod under PWCode
-
+    # TODO: Test en base med blob'er og clob'er som skal til fil på disk-> sjekk først smvprod under PWCode
     # TODO: Må være feil i kolonne source_column_nullable i columns i configdb da den har verdi 1 for kolonner som er primary key
-
-    # "count_of_rows" : 504, -> kan ha som egen i skjema heller enn i comment ser det ut til -> eller skrives den senere? Under validataion?
-    # --> har lagt inn i kode -> sjekk i json og endre så til at leser der heller enn i comment etterpå
-
     # TODO: Test å bruke DISABLEOUT -> bør uansett alltid disable DBMS_OUTPUT for oracle når henter fra LONG og LONG RAW data types
-
     # TODO: Test archive_tar + gjør ferdig archive_dir
-
-    # TODO: Lag fork med click/tui
-
+    # TODO: Lag fork med click/tui (trogon)
     # TODO: Juster så ikke sqlwb sine logger legger seg i jars-mappe. Evt. sletter alle andre logger enn den som heter akkurat workbench.log
-    # -> Også bruke Property: workbench.log.maxfilesize og  workbench.log.backup.count ?
-
+    #       -> Også bruke Property: workbench.log.maxfilesize og  workbench.log.backup.count ?
     # TODO: Starte sqlwb i cli modus fra python? -> se https://www.sql-workbench.eu/manual/console-mode.html
-
-    # TODO: Mulig å validere en og en tabell i datapackage? -> Trenger også å kule vekk tabeller uten feil fra stdout
-
-    # Legg inn så kan eksportere til tsv direkte fra original db -> da må normalisering av tabell- og kolonenavn gjøres!!
-
-    # TODO: Test at eksport av blober virker i archive_db
-
+    # TODO: Legg inn så kan eksportere til tsv direkte fra original db -> da må normalisering av tabell- og kolonenavn gjøres!!
+    # TODO: Bruk sqlean.py til mer (brukes allerede auto av sqlite-utils) -> se hva extensions i den kan brukes til
     # TODO: Trenger en sjekk i export_file_column på at ikke eksporterer tom fil hvis var ikke tom i db
-
-    # TODO: Trenger db som clob'er og blob'er å teste export_table på!
-
-    # # TODO: Fjern så mange config args som mulig -> de som er kun brukt i en modul slik som java_home etter at virker ellers
-
-    # TODO: _data.py som inneholder både configdb og div dataclasses? Kutt alld def I configdb som ikke brukes mange steder?
-
-    # TODO: Ha kun en configdb pr prosjekt. Legg til kolonne som angir "subprosjekt"
-
+    # TODO: Ha kun en configdb pr prosjekt og legge til kolonne som angir "subprosjekt" ?
     # TODO: Løsning for å sjekke verdier class Config inkl at paths finnes! -> bruke check_paths def eller noe innebygget?
-
     # TODO: Dbo som dataclass generert fra def?
-
-    # Bruke config dataclass heller i confirm så er mer ferdig filtert hvilken som skal vises?
-
-    # TODO: Bruk denne for å verifisere at sqlite-base ikke har blitt endret: https://www.sqlite.org/dbhash.html
-
-    # TODO: Når sikker sone git server ok: Installer på adm-sone, kopier til sikker, kjør git pull
-
+    # TODO: Bruke config dataclass heller i confirm så er mer ferdig filtert hvilken som skal vises?
+    # TODO: Bruk denne for å verifisere at sqlite-base ikke har blitt endret? https://www.sqlite.org/dbhash.html
     # TODO: Legg inn row_count i "description" i json fil -> kan da bruke json helelr enn config-db for normalisering! -> bedre?
-
     # TODO: Lag --format og --query args
-
     # TODO: Test _archive med annet target enn source -> sette args.project verdi til hva da og generelt?
-
-    # Putt i core mappe det som ikke generelt nok til utils og heller ikke kaller til ting på nivå over; bare kalles til
-
+    # TODO: Putt i core mappe det som ikke generelt nok til utils og heller ikke kaller til ting på nivå over; bare kalles til
     # TODO: Trengs sjekk for datofelt også i export_table?
+
+
 
     # TODO: Endre export/import av excel mm til sqlwb? https://www.sql-workbench.eu/manual/command-import.html#spreadsheet-import
     # TODO: Lag export_tsv tilsvarende export_xlsx og bruk nå command er archive (eller valg under copy?->senere)

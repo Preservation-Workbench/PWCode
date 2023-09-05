@@ -141,14 +141,14 @@ def _jars(cfg):
 
 def _editor(cfg):
     tmp_editor_dir = Path(cfg.tmp_dir, "editor")
-    if not len(os.listdir(cfg.editor_dir)) > 1:
+    if not cfg.editor_bin.is_file():
         tmp_editor_dir.mkdir(parents=True, exist_ok=True)
         tmp_file = Path(tmp_editor_dir, cfg.editor_url.split("/")[-1])
 
         if not tmp_file.is_file():
-            gui.print_msg("Downloading " + tmp_file.name + " from " + cfg.edit_url, style=gui.style.info)
+            gui.print_msg("Downloading " + tmp_file.name + " from " + cfg.editor_url, style=gui.style.info)
 
-            with requests.get(cfg.edit_url, stream=True) as r:
+            with requests.get(cfg.editor_url, stream=True) as r:
                 with open(tmp_file, "wb") as f:
                     shutil.copyfileobj(r.raw, f)
 
@@ -158,8 +158,8 @@ def _editor(cfg):
             shutil.copytree(sub_dirs[0], cfg.editor_dir, dirs_exist_ok=True)
             shutil.rmtree(tmp_editor_dir)
 
-        if not cfg.edit_bin.is_file():
-            gui.print_msg("Error on installing " + str(cfg.edit_bin), style=gui.style.warning)
+        if not cfg.editor_bin.is_file():
+            gui.print_msg("Error on installing " + str(cfg.editor_bin), style=gui.style.warning)
             sys.exit()
 
     if not cfg.shfmt_bin.is_file():

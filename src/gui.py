@@ -69,7 +69,7 @@ def show(cfg, obj, exit=True, error=False):
     for path in paths:
         env["PATH"] = path + os.pathsep + env["PATH"]
 
-    subprocess.call([cfg.editor, "--config-dir", Path(cfg.editor.parent, "config"), obj], env=env)
+    subprocess.call([cfg.editor_bin, "--config-dir", Path(cfg.editor_dir, "config"), obj], env=env)
 
     if exit:
         if error:
