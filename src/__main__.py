@@ -57,7 +57,13 @@ def get_args(argv):
 
     common_parser = ArgumentParser("common", add_help=False)
 
-    if argv[1] in ["copy"]:
+    if argv[1] == "copy":
+        common_parser.add_argument(
+            "--no-blobs",
+            dest="no_blobs",
+            action="store_true",
+            help="Don't copy blobs (binary data are replaced with NULL)",
+        )
         files = ["tables", "json", "ddl", "copy"]
         common_parser.add_argument(
             "--stop",
@@ -72,10 +78,10 @@ def get_args(argv):
             "--test",
             dest="test",
             action="store_true",
-            help="Test run: Copied data are subsequently deleted and empty target tables are always recreated.",
+            help="Test run. Copied data are subsequently deleted and empty target tables are always recreated.",
         )
 
-    if argv[1] in ["archive"]:
+    if argv[1] == "archive":
         common_parser.add_argument(
             "--target",
             dest="target",
@@ -189,7 +195,8 @@ def get_args(argv):
     edit_arguments = edit_parser.add_argument_group("edit")
     edit_arguments.add_argument("--file", dest="file", type=str, required=True, help="Path to file.")
 
-    args = ensure_args_attr(["stop", "debug", "test", "source", "target", "path", "file"], parser.parse_args())
+    args = ensure_args_attr(["stop", "debug", "test", "source", "target", "path", "file", "no_blobs"],
+                            parser.parse_args())
 
     cfg_file = Path(Path(__file__).resolve().parents[1], "config.yml")
     if not Path(cfg_file).is_file():
@@ -204,6 +211,7 @@ def get_args(argv):
         file_path=args.file,
         debug=args.debug,
         stop=args.stop,
+        no_blobs=args.no_blobs,
         test=args.test,
         source=args.source,
         target=args.target,
@@ -304,8 +312,6 @@ def run(argv):
     # TODO: Test _archive med annet target enn source -> sette args.project verdi til hva da og generelt?
     # TODO: Putt i core mappe det som ikke generelt nok til utils og heller ikke kaller til ting på nivå over; bare kalles til
     # TODO: Trengs sjekk for datofelt også i export_table?
-
-
 
     # TODO: Endre export/import av excel mm til sqlwb? https://www.sql-workbench.eu/manual/command-import.html#spreadsheet-import
     # TODO: Lag export_tsv tilsvarende export_xlsx og bruk nå command er archive (eller valg under copy?->senere)

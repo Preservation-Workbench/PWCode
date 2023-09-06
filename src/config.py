@@ -39,6 +39,7 @@ class Main:  # TODO: Get some values from config file!
     file_path: Path
     debug: bool
     stop: bool
+    no_blobs: bool
     test: bool
     source: str
     target: str
@@ -53,7 +54,7 @@ class Main:  # TODO: Get some values from config file!
     scripts_dir: Path = Path(os.getenv("pwcode_scripts_dir"))
     src_dir: Path = Path(os.getenv("pwcode_src_dir"))
     python_dir: Path = Path(os.getenv("pwcode_python_dir"))
-    #editor_url: str = "https://github.com/zyedidia/micro/releases/download/v2.0.11/micro-2.0.11-linux64.tar.gz"
+    # editor_url: str = "https://github.com/zyedidia/micro/releases/download/v2.0.11/micro-2.0.11-linux64.tar.gz"
     editor_url: str = "https://github.com/zyedidia/micro/releases/download/nightly/micro-2.0.12-dev.76-linux64.tar.gz"
     shfmt_url: str = "https://github.com/mvdan/sh/releases/download/v3.7.0/shfmt_v3.7.0_linux_amd64"
     rg_url: str = "https://github.com/BurntSushi/ripgrep/releases/download/13.0.0/"\
@@ -69,11 +70,11 @@ class Main:  # TODO: Get some values from config file!
     shfmt_bin: Path = Path(editor_dir, "deps", "shfmt")
     fzf_bin: Path = Path(editor_dir, "deps", "fzf")
     rg_bin: Path = Path(editor_dir, "deps", "rg")
-    ctags_bin: Path = Path(editor_dir, "deps", "ctags")    
+    ctags_bin: Path = Path(editor_dir, "deps", "ctags")
 
     def __post_init__(self):
         if jdk.OS == "windows":
-            #self.editor_url = "https://github.com/zyedidia/micro/releases/download/v2.0.11/micro-2.0.11-win64.zip"
+            # self.editor_url = "https://github.com/zyedidia/micro/releases/download/v2.0.11/micro-2.0.11-win64.zip"
             self.editor_url = "https://github.com/zyedidia/micro/releases/download/nightly/micro-2.0.12-dev.76-win64.zip"
             self.java_dir = Path(self.pwcode_dir, "deps", "java.windows")
             self.shfmt_url = "https://github.com/mvdan/sh/releases/download/v3.7.0/shfmt_v3.7.0_windows_amd64.exe"

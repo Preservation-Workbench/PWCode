@@ -83,10 +83,15 @@ def get_copy_statements(json_schema_file, cfg, diff_data):
                 for field in table.schema.fields:
                     source_column_name = field.custom["db_column_name"]
                     target_column_name = field.name
-                    jdbc_db_type = field.custom["jdbc_type"]
+                    jdbc_db_type = int(field.custom["jdbc_type"])
                     fixed_source_column_name = ""
 
-                    if jdbc_db_type in [91, 93] and cfg.target.type == "sqlite":
+                    # TODO: Sjekk om length på felt i json mm må endres når bruker no-blobs
+                    # ->> sansynligvis ikke -> er vel bare problem hvis lenger
+                    # TODO: Validering ok for archive cmd på fullstendig base?
+                    if cfg.no_blobs and jdbc_db_type in [-4, -3, -2, 2004]:
+                        fixed_source_column_name = ("NULL AS " + source_quote(target_column_name) + ",")
+                    elif jdbc_db_type in [91, 93] and cfg.target.type == "sqlite":
                         if cfg.source.type == "h2":
                             fixed_source_column_name = ("FORMATDATETIME(" + source_quote(source_column_name) +
                                                         ",'YYYY-MM-DD HH:mm:ss') AS " +
