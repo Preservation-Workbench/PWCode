@@ -55,7 +55,7 @@ class Main:  # TODO: Get some values from config file!
     src_dir: Path = Path(os.getenv("pwcode_src_dir"))
     python_dir: Path = Path(os.getenv("pwcode_python_dir"))
     # editor_url: str = "https://github.com/zyedidia/micro/releases/download/v2.0.11/micro-2.0.11-linux64.tar.gz"
-    editor_url: str = "https://github.com/zyedidia/micro/releases/download/nightly/micro-2.0.12-dev.76-linux64.tar.gz"
+    editor_url: str = "https://github.com/zyedidia/micro/releases/download/v2.0.12/micro-2.0.12-linux64-static.tar.gz"
     shfmt_url: str = "https://github.com/mvdan/sh/releases/download/v3.7.0/shfmt_v3.7.0_linux_amd64"
     rg_url: str = "https://github.com/BurntSushi/ripgrep/releases/download/13.0.0/"\
         "ripgrep-13.0.0-x86_64-unknown-linux-musl.tar.gz"
@@ -74,8 +74,7 @@ class Main:  # TODO: Get some values from config file!
 
     def __post_init__(self):
         if jdk.OS == "windows":
-            # self.editor_url = "https://github.com/zyedidia/micro/releases/download/v2.0.11/micro-2.0.11-win64.zip"
-            self.editor_url = "https://github.com/zyedidia/micro/releases/download/nightly/micro-2.0.12-dev.76-win64.zip"
+            self.editor_url = "https://github.com/zyedidia/micro/releases/download/v2.0.12/micro-2.0.12-win64.zip"
             self.java_dir = Path(self.pwcode_dir, "deps", "java.windows")
             self.shfmt_url = "https://github.com/mvdan/sh/releases/download/v3.7.0/shfmt_v3.7.0_windows_amd64.exe"
             self.rg_url = "https://github.com/BurntSushi/ripgrep/releases/download/"\

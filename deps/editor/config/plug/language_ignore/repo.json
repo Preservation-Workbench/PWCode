@@ -1,0 +1,29 @@
+[
+  {
+    "Name": "language_ignore",
+    "Description": "Adds syntax highlighting to 'ignore' files.",
+    "Tags": [
+      ".gitignore",
+      ".npmignore",
+      ".dockerignore",
+      ".coffeelintignore",
+      ".slugignore",
+      ".atomignore",
+      ".hgignore",
+      ".vscodeignore",
+      ".eslintignore",
+      ".prettierignore",
+      "syntax highlight"
+    ],
+    "Website": "https://gitlab.com/taconi/micro-language-ignore",
+    "Versions": [
+      {
+        "Version": "0.1.0",
+        "Url": "https://gitlab.com/taconi/micro-language-ignore/-/archive/v0.1.0/micro-language-ignore-v0.1.0.zip",
+        "Require": {
+          "micro": ">=2.0.0"
+        }
+      }
+    ]
+  }
+]

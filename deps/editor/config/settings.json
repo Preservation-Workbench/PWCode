@@ -16,6 +16,7 @@
     "cursorline": false,
     "divchars": "  ",
     "divreverse": false,
+    "fakecursor": true,
     "ft:lua": {
         "tabsize": 3
     },
@@ -30,6 +31,9 @@
     "lsp.server": "python=pylsp",
     "microgit.command": "/usr/bin/git",
     "mkparents": true,
+    "pluginrepos": [
+        "https://gitlab.com/taconi/micro-language-ignore/-/raw/main/repo.json"
+    ],
     "savecursor": true,
     "scrollspeed": 5,
     "statusformatr": " $(microgit.onbranch) ↑$(microgit.numahead) ↓$(microgit.numbehind) ↓↑$(microgit.numstaged) | commit:$(microgit.oncommit)",

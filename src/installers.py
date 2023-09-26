@@ -28,7 +28,6 @@ import requests
 
 def _jdk(cfg):
     if not Path(cfg.java_dir, "bin", "java").is_file():
-
         if cfg.java_dir.is_dir():
             shutil.rmtree(cfg.java_dir)
 

@@ -1,4 +1,5 @@
 {
+    "Alt--": "command:hsplit ",
     "Alt-/": "lua:comment.comment",
     "Alt-Backspace": "DeleteWordLeft",
     "Alt-Ctrl-Space": "command:palettero",
@@ -9,6 +10,7 @@
     "Alt-c": "lua:comment.comment",
     "Alt-d": "command:definition",
     "Alt-f": "command:format",
+    "Alt-i": "command:vsplit ",
     "Alt-k": "command:hover",
     "Alt-r": "command:references",
     "Alt-s": "SaveAs",

@@ -86,9 +86,6 @@ def get_copy_statements(json_schema_file, cfg, diff_data):
                     jdbc_db_type = int(field.custom["jdbc_type"])
                     fixed_source_column_name = ""
 
-                    # TODO: Sjekk om length på felt i json mm må endres når bruker no-blobs
-                    # ->> sansynligvis ikke -> er vel bare problem hvis lenger
-                    # TODO: Validering ok for archive cmd på fullstendig base?
                     if cfg.no_blobs and jdbc_db_type in [-4, -3, -2, 2004]:
                         fixed_source_column_name = ("NULL AS " + source_quote(target_column_name) + ",")
                     elif jdbc_db_type in [91, 93] and cfg.target.type == "sqlite":
