@@ -11,13 +11,13 @@ PWCODE_DIR="$(dirname "$SCRIPTPATH")"/build/release/pwcode-"$PWCODE_VERSION"-lin
 if [ -d "$PWCODE_DIR" ]; then rm -Rf "$PWCODE_DIR"; fi
 git clone "$PWCODE_REPO" "$PWCODE_DIR"
 
-echo "$PWCODE_REPO"
+echo "$PWCODE_DIR"/pwcode
 
 install_rust
 install_pyapp
 build_pwcode "$PWCODE_DIR"
 
-"$PWCODE_DIR"/pwcode install
+cd "$PWCODE_DIR" && ./pwcode install
 
 # TODO: Fiks så installerer deps utover python deps uten å kjøre fullverdig kommando
 # tar -zcvf archive-name.tar.gz source-directory-name

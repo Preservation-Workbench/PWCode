@@ -48,8 +48,7 @@ def ensure_args_attr(attrs, args):
 
 
 def get_args(argv):
-    if argv[1] != "install" or len(argv) == 1 or (len(argv) == 2 and any(x in ["copy", "archive", "script", "edit"]
-                                                                         for x in argv)):
+    if len(argv) == 1 or (len(argv) == 2 and any(x in ["copy", "archive", "script", "edit"] for x in argv)):
         argv.append("--help")
 
     RawTextRichHelpFormatter.styles["argparse.prog"] = gui.style.warning
