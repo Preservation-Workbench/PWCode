@@ -30,4 +30,4 @@ build_pwcode "$PWCODE_DIR"
 
 cd "$PWCODE_DIR" && ./pwcode install
 mv "$PWCODE_DIR" "$PWCODE_BASE_DIR"
-tar -zcvf pwcode-"$PWCODE_VERSION"-linux64.tar.gz "$PWCODE_BASE_DIR"
+tar -zcf "$SCRIPTPATH"/pwcode-"$PWCODE_VERSION"-linux64.tar.gz "$PWCODE_BASE_DIR"
