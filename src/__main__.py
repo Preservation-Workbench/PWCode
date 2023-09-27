@@ -109,7 +109,7 @@ def get_args(argv):
     parser._positionals.title = "Command"
 
     # Commands:
-    subparsers = parser.add_subparsers(help="", dest="command")
+    subparsers = parser.add_subparsers(help="", dest="command", metavar="{copy,archive,configure,script,edit}")
 
     # Copy:
     copy_parser = subparsers.add_parser(
