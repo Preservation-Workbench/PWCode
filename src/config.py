@@ -54,7 +54,6 @@ class Main:  # TODO: Get some values from config file!
     scripts_dir: Path = Path(os.getenv("pwcode_scripts_dir"))
     src_dir: Path = Path(os.getenv("pwcode_src_dir"))
     python_dir: Path = Path(os.getenv("pwcode_python_dir"))
-    # editor_url: str = "https://github.com/zyedidia/micro/releases/download/v2.0.11/micro-2.0.11-linux64.tar.gz"
     editor_url: str = "https://github.com/zyedidia/micro/releases/download/v2.0.12/micro-2.0.12-linux64-static.tar.gz"
     shfmt_url: str = "https://github.com/mvdan/sh/releases/download/v3.7.0/shfmt_v3.7.0_linux_amd64"
     rg_url: str = "https://github.com/BurntSushi/ripgrep/releases/download/13.0.0/"\

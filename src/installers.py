@@ -161,6 +161,8 @@ def _editor(cfg):
             gui.print_msg("Error on installing " + str(cfg.editor_bin), style=gui.style.warning)
             sys.exit()
 
+    Path(cfg.editor_dir, "deps").mkdir(parents=True, exist_ok=True)
+
     if not cfg.shfmt_bin.is_file():
         gui.print_msg("Downloading " + cfg.shfmt_bin.name + " from " + cfg.shfmt_url, style=gui.style.info)
 
