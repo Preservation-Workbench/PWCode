@@ -264,6 +264,7 @@ def run(argv):
     install(show_locals=False)  # Better debugging
     main_cfg = get_args(argv)
 
+    main_cfg.tmp_dir.mkdir(parents=True, exist_ok=True)
     for func in installers.__dict__.values():
         if callable(func) and func.__module__ == installers.__name__:
             func(main_cfg)

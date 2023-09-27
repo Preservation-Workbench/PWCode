@@ -1,13 +1,15 @@
 #!/bin/bash
 
-RED="\033[1;31m"
-GREEN="\033[1;32m" # <-- [0 is not bold
-CYAN="\033[1;36m"
-
 PYAPP_DIR=/tmp/pyapp
 PYAPP_URL=https://github.com/ofek/pyapp/releases/download/v0.10.1/source.tar.gz
 PYTHON_VERSION=3.11
 PWCODE_VERSION=0.1
+
+SCRIPTPATH="$(dirname "$(readlink -f "${BASH_SOURCE[0]}" 2>/dev/null || echo "$0")")"
+
+RED="\033[1;31m"
+GREEN="\033[1;32m" # <-- [0 is not bold
+CYAN="\033[1;36m"
 
 download() {
 	if [ -f "$1" ]; then return 1; fi
@@ -53,7 +55,8 @@ install_pyapp() {
 }
 
 build_pwcode() {
-	PWCODE_DIR="$(dirname "$SCRIPTPATH")"
+	PWCODE_DIR="$1"
+
 	cecho "$CYAN" "Running cargo build..."
 	cd "$PYAPP_DIR" && PYAPP_PROJECT_VERSION=0.1 PYAPP_PROJECT_NAME=pwcode cargo build --release
 	recho $?
@@ -71,6 +74,8 @@ build_pwcode() {
 	cecho "$GREEN" "Binary $PWCODE_DIR/pwcode built successfully."
 }
 
-install_rust
-install_pyapp
-build_pwcode
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+	install_rust
+	install_pyapp
+	build_pwcode "$(dirname "$SCRIPTPATH")"
+fi
