@@ -8,6 +8,14 @@ source "$SCRIPTPATH"/make.sh
 PWCODE_REPO="https://github.com/Preservation-Workbench/PWCode"
 PWCODE_DIR="$(dirname "$SCRIPTPATH")"/build/release/pwcode-"$PWCODE_VERSION"-linux64
 
+GITCHECK="$(git status --porcelain)"
+if [ -n "$GITCHECK" ]; then
+	cecho "$RED" "Working directory has UNCOMMITTED CHANGES. Exiting script.."
+	exit 1
+fi
+
+exit
+
 if [ -d "$PWCODE_DIR" ]; then rm -Rf "$PWCODE_DIR"; fi
 git clone "$PWCODE_REPO" "$PWCODE_DIR"
 
@@ -18,8 +26,4 @@ install_pyapp
 build_pwcode "$PWCODE_DIR"
 
 cd "$PWCODE_DIR" && ./pwcode install
-
-# TODO: Fiks så installerer deps utover python deps uten å kjøre fullverdig kommando
-# tar -zcvf archive-name.tar.gz source-directory-name
-
-# TODO: SJekk mot resulat av "git status" først for å sjekke at alle endringer er med
+tar -zcvf archive-name.tar.gz source-directory-name
