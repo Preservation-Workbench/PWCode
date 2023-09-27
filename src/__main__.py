@@ -48,7 +48,8 @@ def ensure_args_attr(attrs, args):
 
 
 def get_args(argv):
-    if len(argv) == 1 or (len(argv) == 2 and any(x in ["copy", "archive", "script", "edit"] for x in argv)):
+    if argv[1] != "install" or len(argv) == 1 or (len(argv) == 2 and any(x in ["copy", "archive", "script", "edit"]
+                                                                         for x in argv)):
         argv.append("--help")
 
     RawTextRichHelpFormatter.styles["argparse.prog"] = gui.style.warning
@@ -173,6 +174,12 @@ def get_args(argv):
         parents=[common_parser],
     )
 
+    # Install:
+    subparsers.add_parser(
+        "install",
+        add_help=False,
+    )
+
     # Script:
     script_parser = subparsers.add_parser(
         "script",
@@ -268,6 +275,9 @@ def run(argv):
     for func in installers.__dict__.values():
         if callable(func) and func.__module__ == installers.__name__:
             func(main_cfg)
+
+    if main_cfg.command == "install":
+        sys.exit()
 
     _java.init_jvm(main_cfg.java_home, main_cfg.jars_dir)
 
