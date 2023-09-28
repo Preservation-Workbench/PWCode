@@ -1,11 +1,12 @@
 #!/bin/bash
 
 SCRIPTPATH="$(dirname "$(readlink -f "${BASH_SOURCE[0]}" 2>/dev/null || echo "$0")")"
-RELEASE_DIR="$(dirname "$SCRIPTPATH")"/build/release
-PWCODE_DIR=$RELEASE_DIR/PWCode
 
 # shellcheck disable=SC1090
 source "$SCRIPTPATH"/make.sh
+
+RELEASE_DIR="$(dirname "$SCRIPTPATH")"/build/release
+PWCODE_DIR=$RELEASE_DIR/PWCode
 
 if ! [ -x "$(command -v git)" ]; then
 	cecho "$RED" "git command missing. Exiting script.."
@@ -26,5 +27,4 @@ install_pyapp
 build_pwcode "$PWCODE_DIR"
 
 cd "$PWCODE_DIR" && ./pwcode install
-cd "$RELEASE_DIR" && tar -zcf pwcode-"$PWCODE_VERSION"-linux64.tar.gz "$PWCODE_DIR"
-rm -Rf "$PWCODE_DIR"
+cd "$RELEASE_DIR" && tar -zcf pwcode-"$PWCODE_VERSION"-linux64.tar.gz "$(basename "$PWCODE_DIR")" && rm -Rf "$PWCODE_DIR"
