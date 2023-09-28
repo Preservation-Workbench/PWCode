@@ -1,7 +1,7 @@
 #!/bin/bash
 
 SCRIPTPATH="$(dirname "$(readlink -f "${BASH_SOURCE[0]}" 2>/dev/null || echo "$0")")"
-RELEASE_DIR="$(dirname "$SCRIPTPATH")"/build/release/
+RELEASE_DIR="$(dirname "$SCRIPTPATH")"/build/release
 PWCODE_DIR=$RELEASE_DIR/PWCode
 
 # shellcheck disable=SC1090
@@ -26,5 +26,5 @@ install_pyapp
 build_pwcode "$PWCODE_DIR"
 
 cd "$PWCODE_DIR" && ./pwcode install
-cd RELEASE_DIR && tar -zcf pwcode-"$PWCODE_VERSION"-linux64.tar.gz "$PWCODE_DIR"
+cd "$RELEASE_DIR" && tar -zcf pwcode-"$PWCODE_VERSION"-linux64.tar.gz "$PWCODE_DIR"
 rm -Rf "$PWCODE_DIR"
