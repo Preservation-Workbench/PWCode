@@ -38,6 +38,8 @@ install_rust() {
 		cd /tmp && curl --proto '=https' --tlsv1.3 https://sh.rustup.rs -sSf | sh
 		recho $?
 	fi
+	# shellcheck disable=SC1090
+	source "$HOME/.cargo/env"
 }
 
 install_pyapp() {

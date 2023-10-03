@@ -64,6 +64,12 @@ def get_args(argv):
             action="store_true",
             help="Don't copy blobs (binary data are replaced with NULL)",
         )
+        common_parser.add_argument(
+            "--schema",
+            dest="schema",
+            type=str,
+            help="Override default schema from jdbc url",
+        )
         files = ["tables", "json", "ddl", "copy"]
         common_parser.add_argument(
             "--stop",
@@ -201,7 +207,7 @@ def get_args(argv):
     edit_arguments = edit_parser.add_argument_group("edit")
     edit_arguments.add_argument("--file", dest="file", type=str, required=True, help="Path to file.")
 
-    args = ensure_args_attr(["stop", "debug", "test", "source", "target", "path", "file", "no_blobs"],
+    args = ensure_args_attr(["stop", "debug", "test", "source", "target", "path", "file", "no_blobs", "schema"],
                             parser.parse_args())
 
     cfg_file = Path(Path(__file__).resolve().parents[1], "config.yml")
@@ -218,6 +224,7 @@ def get_args(argv):
         debug=args.debug,
         stop=args.stop,
         no_blobs=args.no_blobs,
+        schema=args.schema,
         test=args.test,
         source=args.source,
         target=args.target,

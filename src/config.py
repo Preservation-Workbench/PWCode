@@ -40,6 +40,7 @@ class Main:  # TODO: Get some values from config file!
     debug: bool
     stop: bool
     no_blobs: bool
+    schema: str
     test: bool
     source: str
     target: str

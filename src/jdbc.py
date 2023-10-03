@@ -173,6 +173,8 @@ class Dbo:
             self.url = "jdbc:oracle:thin:" + schema + '/"' + self.password + '"' + login[login.rfind("@"):]
             self.short_url = "jdbc:oracle:thin:" + login[login.rfind("@"):]
             self.user = schema
+            if cfg.schema:
+                schema = cfg.schema
             self.schema = schema.upper()
             self.credentials = None
             self.always_escape = False
@@ -181,7 +183,6 @@ class Dbo:
         # else:
         # print("Not a supported database type. Aborted.")
         # sys.exit()
-
         # Update path to driver to actual path (replace dummy path with actual)
         cfg.jdbc_drivers[self.type]["jar"] = cfg.jdbc_drivers[self.type]["jar"].replace("{JARS_DIR}", str(cfg.jars_dir))
 
