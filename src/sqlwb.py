@@ -221,8 +221,12 @@ def sqlwb_truncate_table(target_table, source_table, cfg):
     else:
         delete_cmd = target_conn + "DELETE FROM " + target_table + ";"
 
+    base_msg = "Error."
+    if cfg.test:
+        base_msg = "Test run."
+
     gui.print_msg(
-        "Test run. Deleting copied table '" + source_table + "' and referring tables:",
+        base_msg + " Deleting copied table '" + source_table + "' and referring tables:",
         style=gui.style.info,
         highlight=True,
     )
