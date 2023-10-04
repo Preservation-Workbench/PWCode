@@ -935,6 +935,7 @@ def get_table_count(jdbc, table_name, cfg):
 
 def get_all_tables_count(jdbc, cfg, keys=True):
     source_or_target = "target"
+    matches = [" ", "$"]
     if jdbc == cfg.source:
         source_or_target = "source"
         tables_count = configdb.get_tables_count(jdbc, cfg)
@@ -956,8 +957,13 @@ def get_all_tables_count(jdbc, cfg, keys=True):
 
         if jdbc == cfg.source:
             source_table = db_table
-            if " " in source_table:
+
+            if any([x in source_table for x in matches]):
                 source_table = '"' + source_table + '"'
+
+            if cfg.schema:
+                source_table = cfg.schema + "." + source_table
+
             row_count = get_table_count(jdbc, source_table, cfg)
             if row_count > 0:
                 include = 1

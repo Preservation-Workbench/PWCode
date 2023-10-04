@@ -75,6 +75,7 @@ def fix_fk(cfg):
 
 
 def get_type(key_column, value_column, Key_value):
+    """ Only jdbc to/from datapackage used for now. The rest is decided by sqlalchemy """
     db_types = [
         ["jdbc_no", "jdbc_name", "iso", "sqlite", "postgresql", "oracle", "datapackage"],
         [-16, "longnvarchar", "clob", "clob", "text", "clob", "string"],
@@ -93,7 +94,7 @@ def get_type(key_column, value_column, Key_value):
         [3, "decimal", "decimal", "decimal", "decimal", "decimal", "number"],
         [4, "integer", "integer", "integer", "integer", "integer", "integer"],
         [5, "smallint", "integer", "integer", "integer", "integer", "integer"],
-        [6, "float", "float", "float", "float", "number", "number"],
+        [6, "float", "float", "float", "number", "number", "number"],
         [7, "real", "real", "real", "real", "real", "number"],
         [8, "double", "double precision", "double precision", "double precision", "double precision", "number"],
         [12, "varchar", "varchar()", "varchar()", "varchar()", "varchar()", "string"],
@@ -117,6 +118,7 @@ def normalize_name(name, index, length=False):
         ("æ", "ae"),
         ("ø", "oe"),
         ("å", "aa"),
+        ("$", ""),
     )
 
     name = reduce(lambda a, kv: a.replace(*kv), repls, name.lower())
