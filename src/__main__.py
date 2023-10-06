@@ -27,6 +27,7 @@ import _copy
 import _archive
 import _script
 import _edit
+import _sql
 import installers
 
 # def get_log_file(args):
@@ -115,7 +116,7 @@ def get_args(argv):
     parser._positionals.title = "Command"
 
     # Commands:
-    subparsers = parser.add_subparsers(help="", dest="command", metavar="{copy,archive,configure,script,edit}")
+    subparsers = parser.add_subparsers(help="", dest="command", metavar="{copy,archive,configure,script,edit,sql}")
 
     # Copy:
     copy_parser = subparsers.add_parser(
@@ -207,6 +208,15 @@ def get_args(argv):
     edit_arguments = edit_parser.add_argument_group("edit")
     edit_arguments.add_argument("--file", dest="file", type=str, required=True, help="Path to file.")
 
+    # SQL:
+    subparsers.add_parser(
+        "sql",
+        add_help=False,
+        description="".join(("Run sql commands.", )),
+        formatter_class=RawTextRichHelpFormatter,
+        parents=[common_parser],
+    )
+
     args = ensure_args_attr(["stop", "debug", "test", "source", "target", "path", "file", "no_blobs", "schema"],
                             parser.parse_args())
 
@@ -296,11 +306,12 @@ def run(argv):
         "archive": (lambda x: _archive.run(main_cfg)),
         "script": (lambda x: _script.run(main_cfg)),
         "edit": (lambda x: _edit.run(main_cfg)),
+        "sql": (lambda x: _sql.run(main_cfg)),
     }
 
     return cmds[main_cfg.command](main_cfg)
 
-    # TODO:Tell antall linjer eksportert før validering heller enn antall tabeller!
+    # TODO: Tell antall linjer eksportert før validering heller enn antall tabeller!
     # TODO: Skriv original databasetype til JSON
     # TODO: Endre til å bruke tmp_dir under projects direkte heller enn en pr project?
     # TODO: Maven bør også hentes fra config heller enn å være angitt direkte i koden
@@ -309,6 +320,7 @@ def run(argv):
     # TODO: Sjekk hvilken databaser som slipper inn null bytes . Bare fjern når original db tillater
     # TODO: Bruke denne så får sqlite med extensions? https://simonwillison.net/2023/Jun/17/sqleanpy/
     # TODO: Test en base med blob'er og clob'er som skal til fil på disk-> sjekk først smvprod under PWCode
+    # TODO: Bytt ut subprocess med command_runner flere steder
     # TODO: Må være feil i kolonne source_column_nullable i columns i configdb da den har verdi 1 for kolonner som er primary key
     # TODO: Test å bruke DISABLEOUT -> bør uansett alltid disable DBMS_OUTPUT for oracle når henter fra LONG og LONG RAW data types
     # TODO: Test archive_tar + gjør ferdig archive_dir

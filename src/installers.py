@@ -27,7 +27,7 @@ import requests
 
 
 def _jdk(cfg):
-    if not Path(cfg.java_dir, "bin", "java").is_file():
+    if not Path(cfg.java_bin).is_file():
         if cfg.java_dir.is_dir():
             shutil.rmtree(cfg.java_dir)
 
@@ -79,7 +79,7 @@ def _jdk(cfg):
             universal_newlines=True,
         )
 
-        if not Path(cfg.java_dir, "bin", "java").is_file():
+        if not Path(cfg.java_bin).is_file():
             gui.print_msg("Error on installing JDK", style=gui.style.warning)
             sys.exit()
         else:

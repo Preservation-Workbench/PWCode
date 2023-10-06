@@ -58,13 +58,8 @@ def get_copy_statements(json_schema_file, cfg, diff_data):
                    cfg.jdbc_drivers[cfg.target.type]["class"])
             params = params + '-preTableStatement="' + pragmas + '" '
 
-        source_type = cfg.source.type
-        if cfg.source.type == "h2":
-            source_type = "postgresql"
-
-        target_type = cfg.target.type
-        if cfg.target.type == "h2":
-            target_type = "postgresql"
+        source_type = cfg.source.type.replace("h2", "postgresql")
+        target_type = cfg.target.type.replace("h2", "postgresql")
 
         source_quote = create_engine("%s://" % source_type, strategy="mock",
                                      executor=_dump).dialect.identifier_preparer.quote

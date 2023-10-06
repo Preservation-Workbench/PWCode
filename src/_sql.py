@@ -14,9 +14,21 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from pathlib import Path
-
-import gui
+import subprocess
 
 
 def run(cfg):
-    gui.show(cfg, Path(cfg.file_path).resolve())
+    cmd = [
+        cfg.java_bin,
+        "-Djava.awt.headless=true",
+        "-Dvisualvm.display.name=SQLWorkbench/J",
+        "-cp",
+        f'{str(cfg.sqlwb_bin)}:{str(Path(cfg.jars_dir,"ext")) + "/*"}',
+        "workbench.console.SQLConsole",
+        f"-configDir={str(cfg.jars_dir)}",
+    ]
+
+    subprocess.call(
+        cmd,
+        universal_newlines=True,
+    )

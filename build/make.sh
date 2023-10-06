@@ -1,7 +1,7 @@
 #!/bin/bash
 
 PYAPP_DIR=/tmp/pyapp
-PYAPP_URL=https://github.com/ofek/pyapp/releases/download/v0.10.1/source.tar.gz
+PYAPP_URL=https://github.com/ofek/pyapp/releases/download/v0.11.1/source.tar.gz
 PYTHON_VERSION=3.11
 PWCODE_VERSION=0.1
 
@@ -64,13 +64,18 @@ build_pwcode() {
 	recho $?
 
 	cecho "$CYAN" "Running cargo install..."
-	PYAPP_PROJECT_VERSION=$PWCODE_VERSION PYAPP_PROJECT_NAME=pwcode PYAPP_EXEC_SCRIPT="$SCRIPTPATH"/install_run.py \
-		PYAPP_PYTHON_VERSION=$PYTHON_VERSION PYAPP_DISTRIBUTION_EMBED=1 PYAPP_FULL_ISOLATION=1 PYAPP_SKIP_INSTALL=1 \
+	PYAPP_PROJECT_VERSION=$PWCODE_VERSION \
+		PYAPP_PROJECT_NAME=pwcode \
+		PYAPP_EXEC_SCRIPT="$SCRIPTPATH/install_run.py" \
+		PYAPP_PYTHON_VERSION=$PYTHON_VERSION \
+		PYAPP_DISTRIBUTION_EMBED=1 \
+		PYAPP_FULL_ISOLATION=1 \
+		PYAPP_SKIP_INSTALL=1 \
 		cargo install pyapp --force --root "$PWCODE_DIR"
 	recho $?
 
 	cecho "$CYAN" "cleanup..."
-	mv -f "$PWCODE_DIR"/bin/pyapp "$PWCODE_DIR"/pwcode && rm -rdf "${PWCODE_DIR:?}"/bin/ && rm "$PWCODE_DIR"/.crates*
+	mv -f "$PWCODE_DIR/bin/pyapp" "$PWCODE_DIR/pwcode" && rm -rdf "${PWCODE_DIR:?}/bin/" && rm "$PWCODE_DIR/.crates*"
 	recho $?
 
 	cecho "$GREEN" "Binary $PWCODE_DIR/pwcode built successfully."

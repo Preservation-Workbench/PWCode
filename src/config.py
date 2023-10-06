@@ -64,7 +64,9 @@ class Main:  # TODO: Get some values from config file!
         "2023.08.13%2Bce46d93811faefaa75b87e334d768fbf9a831861/uctags-2023.08.13-linux-x86_64.tar.xz"
     java_version: str = "11"
     java_dir: Path = Path(pwcode_dir, "deps", "java.linux")
+    java_bin: Path = Path(pwcode_dir, "deps", "java.linux", "bin", "java")
     jars_dir: Path = Path(pwcode_dir, "deps", "jars")
+    sqlwb_bin: Path = Path(jars_dir, "sqlworkbench.jar")
     editor_dir: Path = Path(pwcode_dir, "deps", "editor")
     editor_bin: Path = Path(editor_dir, "micro")
     shfmt_bin: Path = Path(editor_dir, "deps", "shfmt")
@@ -76,6 +78,7 @@ class Main:  # TODO: Get some values from config file!
         if jdk.OS == "windows":
             self.editor_url = "https://github.com/zyedidia/micro/releases/download/v2.0.12/micro-2.0.12-win64.zip"
             self.java_dir = Path(self.pwcode_dir, "deps", "java.windows")
+            self.java_bin = Path(self.pwcode_dir, "deps", "java.windows", "bin", "java.exe")
             self.shfmt_url = "https://github.com/mvdan/sh/releases/download/v3.7.0/shfmt_v3.7.0_windows_amd64.exe"
             self.rg_url = "https://github.com/BurntSushi/ripgrep/releases/download/"\
                 "13.0.0/ripgrep-13.0.0-x86_64-pc-windows-msvc.zip"
