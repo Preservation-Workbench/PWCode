@@ -72,6 +72,9 @@ def get_copy_statements(json_schema_file, cfg, diff_data):
 
             for table in package.resources:
                 source_table_name = table.custom["db_table_name"]
+                if cfg.schema:
+                    source_table_name = cfg.schema + "." + source_table_name
+
                 target_table_name = target_quote(table.name)
 
                 ddl_columns = []
@@ -273,7 +276,7 @@ def run_copy_file(cfg, copy_file, diff_data):
 
     for statement in statements:
         target_table = statement.partition("-targetTable=")[2].partition(" ")[0].partition(".")[2].strip()
-        source_table = statement[statement.rindex(" ") + 1:][:-1].replace('"', "")
+        _, source_table = (statement[statement.rindex(" ") + 1:][:-1].replace('"', "")).rsplit(".")
         source_row_count = int(row_count_pr_table[source_table])
 
         cp_result = ""
