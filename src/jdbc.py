@@ -769,7 +769,6 @@ def get_columns_of_cursor(cursor: Cursor) -> OrderedDict:
 
 
 def get_conn(login, cfg):
-    print(login)
     if login.startswith("jdbc:sqlite:") and cfg.command == "archive":
         db = Database(sqlite3.connect(login.partition("jdbc:sqlite:")[2]))
         db.enable_wal()
