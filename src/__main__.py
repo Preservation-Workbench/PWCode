@@ -49,7 +49,7 @@ def ensure_args_attr(attrs, args):
 
 
 def get_args(argv):
-    if len(argv) == 1 or (len(argv) == 2 and any(x in ["copy", "archive", "script", "edit"] for x in argv)):
+    if len(argv) == 1 or (len(argv) == 2 and any(x in ["copy", "archive", "script", "edit", "sql"] for x in argv)):
         argv.append("--help")
 
     RawTextRichHelpFormatter.styles["argparse.prog"] = gui.style.warning
@@ -162,7 +162,7 @@ def get_args(argv):
         parents=[common_parser],
     )
 
-    archive_arguments = archive_parser.add_argument_group("archive")
+    archive_arguments = archive_parser.add_argument_group("Arguments")
     archive_arguments.add_argument("--source",
                                    dest="source",
                                    type=str,
@@ -194,8 +194,10 @@ def get_args(argv):
         formatter_class=RawTextRichHelpFormatter,
         parents=[common_parser],
     )
-    script_arguments = script_parser.add_argument_group("script")
+    script_arguments = script_parser.add_argument_group("Arguments")
     script_arguments.add_argument("--path", dest="path", type=str, required=True, help="Path to custom script.")
+    script_parser._optionals.title = "Optional"
+    script_parser._action_groups.reverse()
 
     # Edit:
     edit_parser = subparsers.add_parser(
@@ -205,17 +207,23 @@ def get_args(argv):
         formatter_class=RawTextRichHelpFormatter,
         parents=[common_parser],
     )
-    edit_arguments = edit_parser.add_argument_group("edit")
+    edit_arguments = edit_parser.add_argument_group("Arguments")
     edit_arguments.add_argument("--file", dest="file", type=str, required=True, help="Path to file.")
+    edit_parser._optionals.title = "Optional"
+    edit_parser._action_groups.reverse()
 
     # SQL:
-    subparsers.add_parser(
+    sql_parser = subparsers.add_parser(
         "sql",
         add_help=False,
         description="".join(("Run sql commands.", )),
         formatter_class=RawTextRichHelpFormatter,
         parents=[common_parser],
     )
+    sql_arguments = sql_parser.add_argument_group("Arguments")
+    sql_arguments.add_argument("--url", dest="source", type=str, required=True, help="Database jdbc url")
+    sql_parser._optionals.title = "Optional"
+    sql_parser._action_groups.reverse()
 
     args = ensure_args_attr(["stop", "debug", "test", "source", "target", "path", "file", "no_blobs", "schema"],
                             parser.parse_args())

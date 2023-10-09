@@ -122,6 +122,15 @@ def normalize_name(name, index, length=False):
     )
 
     name = reduce(lambda a, kv: a.replace(*kv), repls, name.lower())
+
+    illegal_terms = [
+        "window", "transaction", "function", "stored", "schema", "system", "notnull", "column", "percent", "date",
+        "public", "over", "sql", "range", "member", "interval", "start"
+    ]
+
+    if name in illegal_terms:
+        name = name + "_"
+
     if len(name) > 30 or length:
         name = name[:25] + "_" + str(index)
 
