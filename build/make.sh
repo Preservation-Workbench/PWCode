@@ -1,6 +1,6 @@
 #!/bin/bash
 
-PYAPP_DIR=/tmp/pyapp
+PYAPP_DIR=/tmp/pyapp_${USER}
 PYAPP_URL=https://github.com/ofek/pyapp/releases/download/v0.11.1/source.tar.gz
 PYTHON_VERSION=3.11
 PWCODE_VERSION=0.1
@@ -45,7 +45,7 @@ install_rust() {
 install_pyapp() {
 	if [ ! -f "$PYAPP_DIR"/build.rs ]; then
 		cecho "$CYAN" "Downloading pyapp source code..."
-		PYAPP_SRC=/tmp/pyapp.tar.gz
+		PYAPP_SRC=/tmp/pyapp_${USER}.tar.gz
 		download $PYAPP_SRC $PYAPP_SRC $PYAPP_URL
 		recho $?
 
