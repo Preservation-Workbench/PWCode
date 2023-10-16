@@ -194,7 +194,7 @@ def create_schema(cfg, changed, tables=[], schema_path=None):
         if len(tables) > 0 and source_table not in tables:
             continue
 
-        # print(source_table)
+        print(source_table)
 
         pk = []
         fields = []

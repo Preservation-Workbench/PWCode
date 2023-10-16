@@ -88,13 +88,14 @@ def get_args(argv):
             help="Test run. Copied data are subsequently deleted and empty target tables are always recreated.",
         )
 
-    if argv[1] == "archive":
-        common_parser.add_argument(
-            "--target",
-            dest="target",
-            type=str,
-            help="AIP directory path or project name. Reuses --source if empty.",
-        )
+    # TODO: Hide for now because of bugs in export to tsv code when used
+    # if argv[1] == "archive":
+    #     common_parser.add_argument(
+    #         "--target",
+    #         dest="target",
+    #         type=str,
+    #         help="AIP directory path or project name. Reuses --source if empty.",
+    #     )
 
     common_parser.add_argument(
         "--help",
