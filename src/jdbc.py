@@ -846,7 +846,10 @@ def get_foreign_keys(jdbc, table, cfg, source_table):
     index = 0
     for row in read_results:
         index += 1
-        fk_name = (source_table.rsplit(".")[1])[:25] + "*" + str(index)
+        if "." in source_table:
+            source_table = source_table.rsplit(".")[1]
+
+        fk_name = source_table[:25] + "*" + str(index)
 
         if jdbc == cfg.source:
             cfg.config_db["foreign_keys"].insert(

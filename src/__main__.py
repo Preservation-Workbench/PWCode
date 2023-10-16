@@ -321,6 +321,8 @@ def run(argv):
 
     # TODO: Tell antall linjer eksportert før validering heller enn antall tabeller!
     # TODO: Skriv original databasetype til JSON
+    # TODO: Ta automatisk kopi av SQLite db før normalisering og eksport til tsv?
+    # TODO: Feil i sqlwb når datatype på felt i sqlite satt til datatime -> lag override av sqlalchemy dialect?
     # TODO: Endre til å bruke tmp_dir under projects direkte heller enn en pr project?
     # TODO: Maven bør også hentes fra config heller enn å være angitt direkte i koden
     # TODO: Er raskere å slette opprinnelig kopiert tabell i sqlite som har constraints og så kopiere den på nytt enn å bruke sqlite_utils til å legge på fk!!!!

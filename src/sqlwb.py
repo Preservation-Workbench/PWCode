@@ -276,7 +276,10 @@ def run_copy_file(cfg, copy_file, diff_data):
 
     for statement in statements:
         target_table = statement.partition("-targetTable=")[2].partition(" ")[0].partition(".")[2].strip()
-        _, source_table = (statement[statement.rindex(" ") + 1:][:-1].replace('"', "")).rsplit(".")
+        source_table = statement[statement.rindex(" ") + 1:][:-1].replace('"', "")
+        if "." in source_table:
+            source_table = source_table.rsplit(".")[1]
+
         source_row_count = int(row_count_pr_table[source_table])
 
         cp_result = ""
