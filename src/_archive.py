@@ -69,7 +69,7 @@ def get_sources(main_cfg):
 
 def get_archive_cfg(source, main_cfg):
     target = main_cfg.target
-    if target is None:
+    if not isinstance(target, str):
         target = main_cfg.source
 
     if not Path(target).is_dir():
