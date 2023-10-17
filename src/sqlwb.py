@@ -60,6 +60,9 @@ def get_copy_statements(json_schema_file, cfg, diff_data):
 
         source_type = cfg.source.type.replace("h2", "postgresql")
         target_type = cfg.target.type.replace("h2", "postgresql")
+        
+        source_type = cfg.source.type.replace("access", 'access+pyodbc')
+        target_type = cfg.target.type.replace("access", 'access+pyodbc')
 
         source_quote = create_engine("%s://" % source_type, strategy="mock",
                                      executor=_dump).dialect.identifier_preparer.quote
@@ -99,6 +102,10 @@ def get_copy_statements(json_schema_file, cfg, diff_data):
                             fixed_source_column_name = ("TO_CHAR(" + source_quote(source_column_name) +
                                                         ",'YYYY-MM-DD HH24:MM:SS') AS " +
                                                         source_quote(target_column_name) + ",")
+                        elif cfg.source.type == "access":
+                            fixed_source_column_name = ("FORMAT(" + source_quote(source_column_name) + 
+                                                        ", 'yyyy-MM-dd HH:nn:ss') AS " + 
+                                                        source_quote(target_column_name) + ",")
                         else:
                             gui.print_msg(
                                 "Datetime to formatted string in sqlite not implemented for '" + cfg.source.type + "'",
@@ -114,6 +121,9 @@ def get_copy_statements(json_schema_file, cfg, diff_data):
                         elif cfg.source.type == "oracle":
                             fixed_source_column_name = ("TO_CHAR(" + source_quote(source_column_name) +
                                                         ",'HH24:MM:SS') AS " + source_quote(target_column_name) + ",")
+                        elif cfg.source.type == "access":
+                            fixed_source_column_name = ("FORMAT(" + source_quote(source_column_name) + 
+                                                        ", 'HH:nn:ss') AS " + source_quote(target_column_name) + ",")
                         else:
                             gui.print_msg(
                                 "Time to formatted string in sqlite not implemented for '" + cfg.source.type + "'",
@@ -276,7 +286,12 @@ def run_copy_file(cfg, copy_file, diff_data):
 
     for statement in statements:
         target_table = statement.partition("-targetTable=")[2].partition(" ")[0].partition(".")[2].strip()
-        _, source_table = (statement[statement.rindex(" ") + 1:][:-1].replace('"', "")).rsplit(".")
+        #_, source_table = (statement[statement.rindex(" ") + 1:][:-1].replace('"', "")).rsplit(".")
+        source_table = (statement[statement.rindex(" ") + 1:][:-1].replace('"', ""))
+        if "." in source_table:
+            # Table name is in SCHEMA.TABLE format; strip off the schema.
+            _, source_table = source_table.rsplit(".")
+            
         source_row_count = int(row_count_pr_table[source_table])
 
         cp_result = ""
