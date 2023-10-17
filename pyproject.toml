@@ -26,6 +26,7 @@ dependencies = [
 	"maven-artifact==0.3.3",
 	"dulwich==0.21.5",
 	"sqlean.py==0.21.8.3",
+	"sqlalchemy-access<2.0.0",
 	# For editor:
 	"flake8==6.1.0",
 	"yapf==0.40.1",

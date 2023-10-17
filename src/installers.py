@@ -102,6 +102,9 @@ def _jars(cfg):
         "com.microsoft.sqlserver:mssql-jdbc:jar:12.2.0.jre11",
         "com.h2database:h2:jar:1.4.199",
         "com.oracle.database.jdbc:ojdbc10:jar:19.19.0.0",
+        "com.healthmarketscience.jackcess:jackcess:jar:3.0.1",
+        "org.hsqldb:hsqldb:jar:2.5.0",
+        "net.sf.ucanaccess:ucanaccess:jar:5.0.1",
     ]
 
     for jar in jars:

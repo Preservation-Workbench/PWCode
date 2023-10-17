@@ -30,7 +30,12 @@ drivers:
     h2:
         jar:    '{JARS_DIR}/h2.jar'
         class:  'org.h2.Driver'
-        url:    'jdbc:h2:'        
+        url:    'jdbc:h2:'
+    
+    access:
+        jar:    '{JARS_DIR}/ucanaccess.jar'
+        class:  'net.ucanaccess.jdbc.UcanaccessDriver'
+        url:    'jdbc:ucanaccess://'
 
 aliases:
     #jdbc:mysql://<server>:3306/<database>?user=<user>&password=<password>&useSSL=false

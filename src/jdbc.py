@@ -178,6 +178,15 @@ class Dbo:
             self.schema = schema.upper()
             self.credentials = None
             self.always_escape = False
+        elif self.login.startswith("jdbc:ucanaccess:") and ("access" in cfg.jdbc_drivers):
+            self.type = "access"
+            self.password = ""
+            self.url = login
+            self.short_url = login
+            self.user = ""
+            self.schema = ""
+            self.credentials = None
+            self.always_escape = False
         # elif login.startswith("jdbc:interbase:") and ("interbase" in JDBC_DRIVERS):
         # self.schema = "*"
         # else:
