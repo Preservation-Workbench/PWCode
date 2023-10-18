@@ -39,7 +39,6 @@ import installers
 #
 # return log_file
 
-
 def ensure_args_attr(attrs, args):
     for attr in attrs:
         if not hasattr(args, attr):
