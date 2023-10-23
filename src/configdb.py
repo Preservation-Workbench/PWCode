@@ -18,6 +18,7 @@ from dataclasses import dataclass
 import gui
 import jdbc
 from sqlite_utils import Database
+from sqlite_utils.db import NotFoundError
 from toposort import toposort_flatten
 
 
@@ -216,7 +217,10 @@ def get_norm_tables(config_db):
 
 
 def get_schema_info(system, config_db):
-    schema_info = config_db["schemas"].get(system)
+    try:
+        schema_info = config_db["schemas"].get(system)
+    except NotFoundError:
+        return
 
     return Schema(**schema_info)
 

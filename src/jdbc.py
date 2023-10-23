@@ -898,7 +898,7 @@ def get_columns(jdbc, table, cfg, source_table):
 
     for row in read_results:
         jdbc_data_type = int(str(row[4]))
-        column_size = int(str(row[6])),
+        column_size = int(str(row[6]))
         if jdbc.type == "oracle" and jdbc_data_type in (-1):  # Undetectable column size for Long in oracle
             column_size = int(-1)
 

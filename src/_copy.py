@@ -66,7 +66,8 @@ def get_include_tables(cfg):
         first_run = False
         jdbc.get_all_tables_count(cfg.target, cfg, keys=False)
 
-    if first_run:
+    schema_info = configdb.get_schema_info(cfg.content_dir.name, cfg.config_db)
+    if schema_info is None:
         cfg.config_db["schemas"].insert(
             {
                 "system": cfg.content_dir.name,
