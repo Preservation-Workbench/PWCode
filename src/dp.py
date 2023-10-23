@@ -225,7 +225,7 @@ def create_schema(cfg, changed, tables=[], schema_path=None):
                 if source_column_size == 0:
                     source_column_size = 1
 
-                if source_column_size > 0:  # is -1 for fields like long in oracle with undectable size
+                if source_column_size > 0:  # is -1 for fields like long in oracle with undetectable size
                     field.update(constr)
 
             if source_column == source_pk:
