@@ -66,6 +66,18 @@ def get_include_tables(cfg):
         first_run = False
         jdbc.get_all_tables_count(cfg.target, cfg, keys=False)
 
+    if first_run:
+        cfg.config_db["schemas"].insert(
+            {
+                "system": cfg.content_dir.name,
+                "source_schema": cfg.source.schema,
+                "target_schema": cfg.target.schema,
+                "source_type": cfg.source.type,
+                "target_type": cfg.target.type,
+            },
+            pk="system",
+        )
+
     if not table_file.is_file() or cfg.stop == "tables":
         tables = write_tables_file(table_file, cfg)
     else:

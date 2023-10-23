@@ -214,6 +214,10 @@ def ensure_config_db(db_path, schema_path):
 
 
 def archive_db(source, main_cfg):
+
+    # TODO: Bruk for å hente ut info om opprinnelig db:
+    # schema_info = configdb.get_schema_info(cfg.content_dir.name, cfg.config_db)
+
     cfg = get_archive_cfg(source, main_cfg)
 
     gui.print_msg("Exporting '" + cfg.source.name + "' to tsv-files:", style=gui.style.info)
