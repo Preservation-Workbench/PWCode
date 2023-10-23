@@ -75,7 +75,7 @@ build_pwcode() {
 	recho $?
 
 	cecho "$CYAN" "cleanup..."
-	mv -f "$PWCODE_DIR/bin/pyapp" "$PWCODE_DIR/pwcode" && rm -rdf "${PWCODE_DIR:?}/bin/" && rm "$PWCODE_DIR/.crates*"
+	mv -f "$PWCODE_DIR/bin/pyapp" "$PWCODE_DIR/pwcode" && rm -rdf "${PWCODE_DIR:?}/bin/" && rm -f "$PWCODE_DIR/.crates*"
 	recho $?
 
 	cecho "$GREEN" "Binary $PWCODE_DIR/pwcode built successfully."
