@@ -224,7 +224,9 @@ def create_schema(cfg, changed, tables=[], schema_path=None):
                 # WAIT: Remove two lines under when we have code for removing empty columns
                 if source_column_size == 0:
                     source_column_size = 1
-                field.update(constr)
+
+                if source_column_size > 0:  # is -1 for fields like long in oracle with undectable size
+                    field.update(constr)
 
             if source_column == source_pk:
                 constr["constraints"]["required"] = True
