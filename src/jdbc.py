@@ -187,6 +187,15 @@ class Dbo:
             self.schema = ""
             self.credentials = None
             self.always_escape = False
+        elif self.login.startswith("jdbc:sqlserver:") and ("sqlserver" in cfg.jdbc_drivers):
+            self.type = "sqlserver"
+            self.url = login
+            self.short_url = login
+            self.user = re.search(r'user=(\w+)', login, re.IGNORECASE).group(1)
+            self.password = re.search(r'password=(\w+)', login, re.IGNORECASE).group(1)
+            self.schema = re.search(r'\\(\w+)', login).group(1)
+            self.credentials = None
+            self.always_escape = False
         # elif login.startswith("jdbc:interbase:") and ("interbase" in JDBC_DRIVERS):
         # self.schema = "*"
         # else:
