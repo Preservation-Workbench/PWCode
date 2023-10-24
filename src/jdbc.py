@@ -906,6 +906,11 @@ def get_columns(jdbc, table, cfg, source_table):
     read_results = table_reader_cursor.fetchall()
 
     for row in read_results:
+        jdbc_data_type = int(str(row[4]))
+        column_size = int(str(row[6]))
+        if jdbc.type == "oracle" and jdbc_data_type in (-1):  # Undetectable column size for Long in oracle
+            column_size = int(-1)
+
         if jdbc == cfg.source:
             cfg.config_db["columns"].insert(
                 {
@@ -913,9 +918,9 @@ def get_columns(jdbc, table, cfg, source_table):
                     "source_table": str(row[2]),
                     "source_column": str(row[3]),
                     "norm_column": db.normalize_name(str(row[3]), row[16]),
-                    "jdbc_data_type": int(str(row[4])),
+                    "jdbc_data_type": jdbc_data_type,
                     "source_data_type": str(row[5]),
-                    "source_column_size": int(str(row[6])),
+                    "source_column_size": column_size,
                     "source_column_nullable": int(str(row[10])),
                     "source_column_position": int(str(row[16])),
                     "source_column_autoincrement": str(row[20]),
@@ -929,7 +934,7 @@ def get_columns(jdbc, table, cfg, source_table):
                 {
                     "target_column": str(row[3]),
                     "target_data_type": str(row[5]),
-                    "target_column_size": int(str(row[6])),
+                    "target_column_size": column_size,
                     "target_column_nullable": int(str(row[10])),
                     "target_column_position": int(str(row[16])),
                     "target_column_autoincrement": str(row[20]),

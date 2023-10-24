@@ -13,15 +13,39 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from dataclasses import dataclass
+
 import gui
 import jdbc
 from sqlite_utils import Database
+from sqlite_utils.db import NotFoundError
 from toposort import toposort_flatten
+
+
+@dataclass
+class Schema:
+    system: str
+    source_schema: str
+    target_schema: str
+    source_type: str
+    target_type: str
 
 
 def create_db(path):
     configdb = Database(path, use_counts_table=True)
     configdb.enable_wal()
+
+    configdb["schemas"].create(
+        {
+            "system": str,
+            "source_schema": str,
+            "target_schema": str,
+            "source_type": str,
+            "target_type": str,
+        },
+        pk=("system"),
+        if_not_exists=True,
+    )
 
     configdb["tables"].create(
         {
@@ -190,6 +214,15 @@ def get_norm_tables(config_db):
         norm_tables[row["source_name"]] = row["norm_name"]
 
     return norm_tables
+
+
+def get_schema_info(system, config_db):
+    try:
+        schema_info = config_db["schemas"].get(system)
+    except NotFoundError:
+        return
+
+    return Schema(**schema_info)
 
 
 def get_norm_columns(config_db):
