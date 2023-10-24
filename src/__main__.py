@@ -126,7 +126,6 @@ def get_args(argv):
         description="Copy database data.",
         epilog="".join((
             "Files:\n",
-            "  config: Config file for connctions/aliases, database drivers etc.\n",
             "  tables: List of tables to export or copy.\n",
             "  json:   JSON schema of data package with tables in dependency order.\n",
             "  ddl:    SQL code generated from JSON schema to recreate source schema.\n",
