@@ -35,6 +35,7 @@ import jdk
 class Main:  # TODO: Get some values from config file!
     cfg_file: Path
     command: str
+    args: str
     script_path: Path
     file_path: Path
     debug: bool

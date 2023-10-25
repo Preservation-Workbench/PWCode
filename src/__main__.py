@@ -237,6 +237,7 @@ def get_args(argv):
     return config.Main(
         cfg_file=cfg_file,
         command=args.command,
+        args=" ".join(argv[1:]),
         script_path=args.path,
         file_path=args.file,
         debug=args.debug,

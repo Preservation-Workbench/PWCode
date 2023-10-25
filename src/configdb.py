@@ -23,12 +23,13 @@ from toposort import toposort_flatten
 
 
 @dataclass
-class Schema:
-    system: str
+class SubSystem:
+    name: str
     source_schema: str
     target_schema: str
     source_type: str
     target_type: str
+    args: str
 
 
 def create_db(path):
@@ -38,15 +39,16 @@ def create_db(path):
     configdb = Database(path, use_counts_table=True)
     configdb.enable_wal()
 
-    configdb["schemas"].create(
+    configdb["sub_systems"].create(
         {
-            "system": str,  # Name of directory under content in project
-            "source_schema": str,
-            "target_schema": str,
-            "source_type": str,
-            "target_type": str,
+            "name": str,  # Name of directory under content in project
+            "source_schema": str,  # Schema name in source database
+            "target_schema": str,  # Schema name in target database
+            "source_type": str,  # Source database type
+            "target_type": str,  # Target database type
+            "args": str,  # Arguments pwcode was run with
         },
-        pk="system",
+        pk="name",
         if_not_exists=True,
     )
 
@@ -188,7 +190,6 @@ def connect_column_fk(cfg):
     """
     Connect foreign key references to table-column-postions
     """
-
     for row in cfg.config_db.query("""
             SELECT f.source_name,
                    f.source_table,
@@ -228,16 +229,37 @@ def get_norm_tables(config_db):
     return norm_tables
 
 
-def get_schema_info(system, config_db):
+def get_sub_system(system, config_db):
     """
-    Retrieve informaton about original database schema before running archive command
+    Retrieve informaton about original sub_system source before running archive command
     """
     try:
-        schema_info = config_db["schemas"].get(system)
+        sub_system = config_db["sub_systems"].get(system)
     except NotFoundError:
         return
 
-    return Schema(**schema_info)
+    return SubSystem(**sub_system)
+
+
+def update_sub_system(cfg):
+    """
+    Update information about sub_system
+    """
+    schema_info = get_sub_system(cfg.content_dir.name, cfg.config_db)
+    if schema_info is None:
+        cfg.config_db["sub_systems"].insert(
+            {
+                "name": cfg.content_dir.name,
+                "source_schema": cfg.source.schema,
+                "target_schema": cfg.target.schema,
+                "source_type": cfg.source.type,
+                "target_type": cfg.target.type,
+                "args": cfg.args,
+            },
+            pk="name",
+        )
+    elif "--stop" not in cfg.args:
+        cfg.config_db["sub_systems"].update(cfg.content_dir.name, {"args": cfg.args})
 
 
 def get_norm_columns(config_db):
@@ -395,7 +417,6 @@ def data_diff(cfg, count=False):
     """
     Retrieve list of tables in target database with missing data compared to source database
     """
-
     diff_data = {}
     if cfg.test:
         return diff_data
