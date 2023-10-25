@@ -245,8 +245,8 @@ def update_sub_system(cfg):
     """
     Update information about sub_system
     """
-    schema_info = get_sub_system(cfg.content_dir.name, cfg.config_db)
-    if schema_info is None:
+    sub_system = get_sub_system(cfg.content_dir.name, cfg.config_db)
+    if sub_system is None:
         cfg.config_db["sub_systems"].insert(
             {
                 "name": cfg.content_dir.name,

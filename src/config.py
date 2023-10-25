@@ -109,12 +109,12 @@ class Copy(Main):
 @dataclass()
 class Archive(Main):
     schema_path: Path = None
+    content_dir: Path = None
     # target_type: str = None
     # project_dir: Path = None
     # target_name: str = None
     # source_db_path: Path = None
     # target_db_path: Path = None
-    # content_dir: Path = None
     # data_dir: Path = None
     # data_files_dir: Path = None
 
