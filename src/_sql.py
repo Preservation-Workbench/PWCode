@@ -21,6 +21,9 @@ import jdbc
 
 
 def run(cfg):
+    if cfg.source in cfg.login_alias:
+        cfg.source = cfg.login_alias[cfg.source]
+
     source = jdbc.get_conn(cfg.source, cfg)
     source_conn = sqlwb.get_connect_cmd(source, cfg).replace("WbConnect", "").replace(" -", ",")[1:][:-1]
 
@@ -32,7 +35,7 @@ def run(cfg):
         f'{str(cfg.sqlwb_bin)}:{str(Path(cfg.jars_dir,"ext"))}/*',
         "workbench.console.SQLConsole",
         f"-configDir={str(cfg.jars_dir)}",
-        '-connection="' + source_conn + '"',
+        f'-connection="{source_conn}"',
     ]
 
     subprocess.call(cmd, universal_newlines=True)
