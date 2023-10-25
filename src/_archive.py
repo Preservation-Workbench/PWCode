@@ -114,7 +114,7 @@ def export_file_column(dbo, table, file_column, cfg):
 
 
 def export_text_columns(dbo, table, text_columns, tsv_path, cfg):
-    # Use version in sqlwb for now because of performance issues (too slow and runs out of memory on big tables)
+    # Use version in sqlwb.py for now because of performance issues (too slow and runs out of memory on big tables)
     def _fix_text(val):
         repls = {"\t": " ", "\n": "", "\r": ""}  # Replace tabs and linebreaks
         for key in repls:
@@ -257,15 +257,15 @@ def archive_db(source, main_cfg):
             text_columns = {}
             changed = True
             for field in table.schema.fields:
-                jdbc_db_type = field.custom["jdbc_type"]
+                jdbc_data_type = field.custom["jdbc_type"]
 
                 max_length = 0
                 if "maxLength" in field.constraints.keys():
                     max_length = field.constraints["maxLength"]
 
-                if jdbc_db_type in [
+                if jdbc_data_type in [
                         -4, -3, -2, 2004
-                ] or (jdbc_db_type in [-16, -1, 2005, 2009, 2011]
+                ] or (jdbc_data_type in [-16, -1, 2005, 2009, 2011]
                       and max_length > 4000):  # Check for blobs and big clobs that should be exported as separate files
                     text_columns[field.name] = ("(SELECT " + table.name + "_" + field.name + " || rowid || .data AS " +
                                                 field.name + ")")
