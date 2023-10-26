@@ -23,27 +23,32 @@ from toposort import toposort_flatten
 
 
 @dataclass
-class Schema:
-    system: str
+class SubSystem:
+    name: str
     source_schema: str
     target_schema: str
     source_type: str
     target_type: str
+    args: str
 
 
 def create_db(path):
+    """
+    Create config database
+    """
     configdb = Database(path, use_counts_table=True)
     configdb.enable_wal()
 
-    configdb["schemas"].create(
+    configdb["sub_systems"].create(
         {
-            "system": str,
-            "source_schema": str,
-            "target_schema": str,
-            "source_type": str,
-            "target_type": str,
+            "name": str,  # Name of directory under content in project
+            "source_schema": str,  # Schema name in source database
+            "target_schema": str,  # Schema name in target database
+            "source_type": str,  # Source database type
+            "target_type": str,  # Target database type
+            "args": str,  # Arguments pwcode was run with
         },
-        pk=("system"),
+        pk="name",
         if_not_exists=True,
     )
 
@@ -147,6 +152,9 @@ def create_db(path):
 
 
 def update_table_deps(tables, cfg):
+    """
+    Write dependent tables per table to config database
+    """
     gui.print_msg("Get dependencies per table...", style=gui.style.info)
 
     deps_dict = {}
@@ -179,7 +187,9 @@ def update_table_deps(tables, cfg):
 
 
 def connect_column_fk(cfg):
-    # Connect foreign key references to table-column-postions:
+    """
+    Connect foreign key references to table-column-postions
+    """
     for row in cfg.config_db.query("""
             SELECT f.source_name,
                    f.source_table,
@@ -203,6 +213,9 @@ def connect_column_fk(cfg):
 
 
 def get_norm_tables(config_db):
+    """
+    Retrieve table names to normalized table names mapping
+    """
     norm_tables = {}
     for row in config_db.query("""
             SELECT source_name,
@@ -216,16 +229,43 @@ def get_norm_tables(config_db):
     return norm_tables
 
 
-def get_schema_info(system, config_db):
+def get_sub_system(system, config_db):
+    """
+    Retrieve informaton about original sub_system source before running archive command
+    """
     try:
-        schema_info = config_db["schemas"].get(system)
+        sub_system = config_db["sub_systems"].get(system)
     except NotFoundError:
         return
 
-    return Schema(**schema_info)
+    return SubSystem(**sub_system)
+
+
+def update_sub_system(cfg):
+    """
+    Update information about sub_system
+    """
+    sub_system = get_sub_system(cfg.content_dir.name, cfg.config_db)
+    if sub_system is None:
+        cfg.config_db["sub_systems"].insert(
+            {
+                "name": cfg.content_dir.name,
+                "source_schema": cfg.source.schema,
+                "target_schema": cfg.target.schema,
+                "source_type": cfg.source.type,
+                "target_type": cfg.target.type,
+                "args": cfg.args,
+            },
+            pk="name",
+        )
+    elif "--stop" not in cfg.args:
+        cfg.config_db["sub_systems"].update(cfg.content_dir.name, {"args": cfg.args})
 
 
 def get_norm_columns(config_db):
+    """
+    Retrieve column names to normalized column names mapping
+    """
     norm_columns = {}
     for row in config_db.query("""
             SELECT c.source_table,
@@ -243,6 +283,9 @@ def get_norm_columns(config_db):
 
 
 def get_include_tables(cfg):
+    """
+    Retrieve list of tables to be copied
+    """
     include_tables = []
     for row in cfg.config_db.query("""
             SELECT source_name
@@ -256,7 +299,26 @@ def get_include_tables(cfg):
     return include_tables
 
 
+def get_copied_tables(cfg):
+    """
+    Retrieve list of tables already copied
+    """
+    copied_tables = []
+    for row in cfg.config_db.query("""
+            SELECT source_name
+            FROM tables
+            WHERE source_row_count > 0
+            AND   source_row_count = target_row_count
+            """):
+        copied_tables.append(row["source_name"])
+
+    return copied_tables
+
+
 def get_validated_tables(cfg):
+    """
+    Retrieve list of tables already copied + validated
+    """
     validated_tables = []
     for row in cfg.config_db.query("""
             SELECT norm_name
@@ -271,6 +333,9 @@ def get_validated_tables(cfg):
 
 
 def get_tables_count(jdbc, cfg):
+    """
+    Retrieve row count per table for all tables
+    """
     tables_count = {}
     if jdbc == cfg.source:
         for row in cfg.config_db.query("""
@@ -293,6 +358,9 @@ def get_tables_count(jdbc, cfg):
 
 
 def update_include(cfg, tables):
+    """
+    Modify list of tables to be copied
+    """
     for row in cfg.config_db["tables"].rows:
         if row["source_name"] in tables or (int(row["source_row_count"]) > 0
                                             and int(row["target_row_count"]) == int(row["source_row_count"])):
@@ -303,20 +371,10 @@ def update_include(cfg, tables):
             cfg.config_db["tables"].update(row["source_name"], {"include": 0})
 
 
-def get_copied_tables(cfg):
-    copied_tables = []
-    for row in cfg.config_db.query("""
-            SELECT source_name
-            FROM tables
-            WHERE source_row_count > 0
-            AND   source_row_count = target_row_count
-            """):
-        copied_tables.append(row["source_name"])
-
-    return copied_tables
-
-
 def get_tables_deps(cfg):
+    """
+    Retrieve dependent tables per table for all tables
+    """
     deps_pr_table = {}
     for row in cfg.config_db.query("""
             SELECT source_name,
@@ -329,6 +387,9 @@ def get_tables_deps(cfg):
 
 
 def get_cp_error_tables(cfg):
+    """
+    Retrieve list of tables where errors occurred during copying
+    """
     error_tables = []
     for row in cfg.config_db["tables"].rows_where("cp_error = 1"):
         error_tables.append(row["source_name"])
@@ -337,6 +398,9 @@ def get_cp_error_tables(cfg):
 
 
 def tables_diff(cfg):
+    """
+    Retrieve list of tables not yet created in target database
+    """
     created_tables = []
     for row in cfg.config_db["tables"].rows_where("created = 1"):
         created_tables.append(row["source_name"])
@@ -350,6 +414,9 @@ def tables_diff(cfg):
 
 
 def data_diff(cfg, count=False):
+    """
+    Retrieve list of tables in target database with missing data compared to source database
+    """
     diff_data = {}
     if cfg.test:
         return diff_data

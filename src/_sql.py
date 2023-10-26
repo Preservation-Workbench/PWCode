@@ -1,4 +1,4 @@
-# Copyright(C) 2022 Morten Eek
+# Copyright(C) 2023 Morten Eek
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -21,23 +21,21 @@ import jdbc
 
 
 def run(cfg):
-    source = jdbc.get_conn(cfg.source, cfg)
-    source_conn = sqlwb.get_connect_cmd(source, cfg)
-    print(source_conn)
+    if cfg.source in cfg.login_alias:
+        cfg.source = cfg.login_alias[cfg.source]
 
-    # jdbc:sqlite:/home/pwb/bin/PWCode/projects/tester1/tmp/desktopsystemx-config.db
-    # WbConnect -url=jdbc:sqlite:/home/pwb/bin/PWCode/projects/tester1/tmp/desktopsystemx-config.db -username= -password= -driverJar=/home/pwb/bin/PWCode/deps/jars/sqlite-jdbc.jar -driver=org.sqlite.JDBC;
+    source = jdbc.get_conn(cfg.source, cfg)
+    source_conn = sqlwb.get_connect_cmd(source, cfg).replace("WbConnect", "").replace(" -", ",")[1:][:-1]
 
     cmd = [
-        cfg.java_bin,
+        str(cfg.java_bin),
         "-Djava.awt.headless=true",
         "-Dvisualvm.display.name=SQLWorkbench/J",
         "-cp",
         f'{str(cfg.sqlwb_bin)}:{str(Path(cfg.jars_dir,"ext"))}/*',
         "workbench.console.SQLConsole",
         f"-configDir={str(cfg.jars_dir)}",
-        source_conn,
-        # '-url=jdbc:h2:mem:PWB -password="";',
+        f'-connection="{source_conn}"',
     ]
 
-    # subprocess.call(cmd, universal_newlines=True)
+    subprocess.call(cmd, universal_newlines=True)

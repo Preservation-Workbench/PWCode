@@ -97,7 +97,7 @@ def get_archive_cfg(source, main_cfg):
         'tmp_dir': tmp_dir,
         'config_db': config_db
     }
-    cfg = config.Archive(**main_cfg_values, schema_path=schema_path)
+    cfg = config.Archive(**main_cfg_values, schema_path=schema_path, content_dir=source.parent)
 
     return cfg
 
@@ -114,7 +114,7 @@ def export_file_column(dbo, table, file_column, cfg):
 
 
 def export_text_columns(dbo, table, text_columns, tsv_path, cfg):
-    # Use version in sqlwb for now because of performance issues (too slow and runs out of memory on big tables)
+    # Use version in sqlwb.py for now because of performance issues (too slow and runs out of memory on big tables)
     def _fix_text(val):
         repls = {"\t": " ", "\n": "", "\r": ""}  # Replace tabs and linebreaks
         for key in repls:
@@ -214,11 +214,12 @@ def ensure_config_db(db_path, schema_path):
 
 
 def archive_db(source, main_cfg):
-
-    # TODO: Bruk for å hente ut info om opprinnelig db:
-    # schema_info = configdb.get_schema_info(cfg.content_dir.name, cfg.config_db)
-
     cfg = get_archive_cfg(source, main_cfg)
+
+    export_blobs = True
+    sub_system = configdb.get_sub_system(cfg.content_dir.name, cfg.config_db)
+    if "--no-blobs" in sub_system.args:
+        export_blobs = False
 
     gui.print_msg("Exporting '" + cfg.source.name + "' to tsv-files:", style=gui.style.info)
 
@@ -257,24 +258,25 @@ def archive_db(source, main_cfg):
             text_columns = {}
             changed = True
             for field in table.schema.fields:
-                jdbc_db_type = field.custom["jdbc_type"]
+                jdbc_data_type = field.custom["jdbc_type"]
 
                 max_length = 0
                 if "maxLength" in field.constraints.keys():
                     max_length = field.constraints["maxLength"]
 
-                if jdbc_db_type in [
-                        -4, -3, -2, 2004
-                ] or (jdbc_db_type in [-16, -1, 2005, 2009, 2011]
-                      and max_length > 4000):  # Check for blobs and big clobs that should be exported as separate files
+                # Check for blobs and big clobs that should be exported as separate files
+                if (export_blobs
+                        and jdbc_data_type in [-4, -3, -2, 2004]) or (jdbc_data_type in [-16, -1, 2005, 2009, 2011]
+                                                                      and max_length > 4000):
+                    file_columns.append(field.name)
                     text_columns[field.name] = ("(SELECT " + table.name + "_" + field.name + " || rowid || .data AS " +
                                                 field.name + ")")
-                    file_columns.append(field.name)
                 else:
                     text_columns[field.name] = field.name
 
             fix_table(dbo, table, text_columns, cfg)
             result = sqlwb.export_text_columns(dbo, table, text_columns, tsv_path, cfg)
+
             if row_count_check(tsv_path, table) is False or result == "Error":
                 gui.print_msg("Wrong row count! Re-exporting with alternate method...", style=gui.style.info)
                 if tsv_path.is_file():

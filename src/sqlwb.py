@@ -60,7 +60,7 @@ def get_copy_statements(json_schema_file, cfg, diff_data):
 
         source_type = cfg.source.type.replace("h2", "postgresql")
         target_type = cfg.target.type.replace("h2", "postgresql")
-        
+
         source_type = cfg.source.type.replace("access", 'access+pyodbc')
         target_type = cfg.target.type.replace("access", 'access+pyodbc')
 
@@ -84,12 +84,12 @@ def get_copy_statements(json_schema_file, cfg, diff_data):
                 for field in table.schema.fields:
                     source_column_name = field.custom["db_column_name"]
                     target_column_name = field.name
-                    jdbc_db_type = int(field.custom["jdbc_type"])
+                    jdbc_data_type = int(field.custom["jdbc_type"])
                     fixed_source_column_name = ""
 
-                    if cfg.no_blobs and jdbc_db_type in [-4, -3, -2, 2004]:
+                    if cfg.no_blobs and jdbc_data_type in [-4, -3, -2, 2004]:
                         fixed_source_column_name = ("NULL AS " + source_quote(target_column_name) + ",")
-                    elif jdbc_db_type in [91, 93] and cfg.target.type == "sqlite":
+                    elif jdbc_data_type in [91, 93] and cfg.target.type == "sqlite":
                         if cfg.source.type == "h2":
                             fixed_source_column_name = ("FORMATDATETIME(" + source_quote(source_column_name) +
                                                         ",'YYYY-MM-DD HH:mm:ss') AS " +
@@ -103,15 +103,15 @@ def get_copy_statements(json_schema_file, cfg, diff_data):
                                                         ",'YYYY-MM-DD HH24:MM:SS') AS " +
                                                         source_quote(target_column_name) + ",")
                         elif cfg.source.type == "access":
-                            fixed_source_column_name = ("FORMAT(" + source_quote(source_column_name) + 
-                                                        ", 'yyyy-MM-dd HH:nn:ss') AS " + 
+                            fixed_source_column_name = ("FORMAT(" + source_quote(source_column_name) +
+                                                        ", 'yyyy-MM-dd HH:nn:ss') AS " +
                                                         source_quote(target_column_name) + ",")
                         else:
                             gui.print_msg(
                                 "Datetime to formatted string in sqlite not implemented for '" + cfg.source.type + "'",
                                 exit=True,
                             )
-                    elif jdbc_db_type == 92 and cfg.target.type == "sqlite":
+                    elif jdbc_data_type == 92 and cfg.target.type == "sqlite":
                         if cfg.source.type == "h2":
                             fixed_source_column_name = ("FORMATDATETIME(" + source_quote(source_column_name) +
                                                         ",'HH:mm:ss') AS " + source_quote(target_column_name) + ",")
@@ -122,7 +122,7 @@ def get_copy_statements(json_schema_file, cfg, diff_data):
                             fixed_source_column_name = ("TO_CHAR(" + source_quote(source_column_name) +
                                                         ",'HH24:MM:SS') AS " + source_quote(target_column_name) + ",")
                         elif cfg.source.type == "access":
-                            fixed_source_column_name = ("FORMAT(" + source_quote(source_column_name) + 
+                            fixed_source_column_name = ("FORMAT(" + source_quote(source_column_name) +
                                                         ", 'HH:nn:ss') AS " + source_quote(target_column_name) + ",")
                         else:
                             gui.print_msg(

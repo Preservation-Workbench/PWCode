@@ -906,11 +906,6 @@ def get_columns(jdbc, table, cfg, source_table):
     read_results = table_reader_cursor.fetchall()
 
     for row in read_results:
-        jdbc_data_type = int(str(row[4]))
-        column_size = int(str(row[6]))
-        if jdbc.type == "oracle" and jdbc_data_type in (-1):  # Undetectable column size for Long in oracle
-            column_size = int(-1)
-
         if jdbc == cfg.source:
             cfg.config_db["columns"].insert(
                 {
@@ -918,9 +913,9 @@ def get_columns(jdbc, table, cfg, source_table):
                     "source_table": str(row[2]),
                     "source_column": str(row[3]),
                     "norm_column": db.normalize_name(str(row[3]), row[16]),
-                    "jdbc_data_type": jdbc_data_type,
+                    "jdbc_data_type": int(str(row[4])),
                     "source_data_type": str(row[5]),
-                    "source_column_size": column_size,
+                    "source_column_size": int(str(row[6])),
                     "source_column_nullable": int(str(row[10])),
                     "source_column_position": int(str(row[16])),
                     "source_column_autoincrement": str(row[20]),
@@ -934,7 +929,7 @@ def get_columns(jdbc, table, cfg, source_table):
                 {
                     "target_column": str(row[3]),
                     "target_data_type": str(row[5]),
-                    "target_column_size": column_size,
+                    "target_column_size": int(str(row[6])),
                     "target_column_nullable": int(str(row[10])),
                     "target_column_position": int(str(row[16])),
                     "target_column_autoincrement": str(row[20]),
@@ -1036,8 +1031,11 @@ def fix_column_size(tables, first_run, cfg):
     for row in cfg.config_db["columns"].rows:
         source_table = str(row["source_table"])
         if (source_table in tables and int(row["fixed_size"]) == 0
-                and int(row["jdbc_data_type"]) in (-15, -9, -8, 1, 12) and int(row["source_column_size"]) > 4000):
+                and int(row["jdbc_data_type"]) in (-16, -15, -9, -8, -1, 1, 12, 2005, 2009, 2011)
+                and int(row["source_column_size"]) > 4000):
+
             gui.print_overwrite(source_table)
+
             if " " in source_table:
                 source_table = '"' + source_table + '"'
 
@@ -1048,9 +1046,9 @@ def fix_column_size(tables, first_run, cfg):
                 source_column = '"' + source_column + '"'
 
             max_length = str(
-                jdbc.query_single_value("SELECT MAX(LENGTH(" + source_column + ")) FROM " + source_table) or 0)
+                jdbc.query_single_value("SELECT MAX(LENGTH(" + source_column + ")) FROM " + source_table) or -1)
             cfg.config_db["columns"].update(row["tbl_col_pos"], {"source_column_size": max_length, "fixed_size": 1})
-            fixed[str(row["tbl_col_pos"])] = max_length
+            fixed[str(row["tbl_col_pos"])] = max_length  # Undetectable column lengths (eg oracle long) are saved as -1
 
     for row in cfg.config_db["foreign_key"].rows:
         tbl_col_pos = str(row["tbl_col_pos"])
