@@ -68,7 +68,7 @@ def write_field(engine, field):
     return type
 
 
-def write_table(engine, schema, args, fk, *, table_name):
+def write_table(engine, schema, fk, *, table_name):
     """Convert frictionless schema to sqlalchemy table"""
     columns = []
     constraints = []
@@ -194,8 +194,6 @@ def create_schema(cfg, changed, tables=[], schema_path=None):
         if len(tables) > 0 and source_table not in tables:
             continue
 
-        # print(source_table)
-
         pk = []
         fields = []
         for row in cfg.config_db.query(f"""
@@ -217,15 +215,15 @@ def create_schema(cfg, changed, tables=[], schema_path=None):
                 "jdbc_type": str(jdbc_data_type),
                 "db_column_name": source_column,
             }
+
             constr = {"constraints": {}}
 
             if jdbc_data_type in (-16, -15, -9, -8, -1, 1, 12, 2005, 2009, 2011):
                 constr["constraints"]["maxLength"] = source_column_size
-                # WAIT: Remove two lines under when we have code for removing empty columns
-                if source_column_size == 0:
-                    source_column_size = 1
 
-                if source_column_size > 0:  # is -1 for fields like long in oracle with undetectable size
+                # Don't apply constraint for empty columns (source_column_size = 0)
+                # Potentially untrue for cases like long in oracle with undetectable size
+                if source_column_size > 0 and not (jdbc_data_type == -1 and cfg.source.type == "oracle"):
                     field.update(constr)
 
             if source_column == source_pk:
@@ -286,17 +284,17 @@ def create_schema(cfg, changed, tables=[], schema_path=None):
     return schema_path
 
 
-def create_ddl(schema_path, changed, args):
-    jdbc = args.target
-    ddl_file = Path(args.content_dir, jdbc.type + "-ddl.sql")
-    ddl_fk_file = Path(args.content_dir, jdbc.type + "-fk-ddl.sql")
+def create_ddl(schema_path, changed, cfg):
+    jdbc = cfg.target
+    ddl_file = Path(cfg.content_dir, jdbc.type + "-ddl.sql")
+    ddl_fk_file = Path(cfg.content_dir, jdbc.type + "-fk-ddl.sql")
     files = [ddl_fk_file]
 
-    if args.target.type != "sqlite":
+    if cfg.target.type != "sqlite":
         files.append(ddl_file)
 
     for fil in files:
-        if fil.is_file() and args.stop != "ddl" and not changed:
+        if fil.is_file() and cfg.stop != "ddl" and not changed:
             gui.print_msg("DDL for schema already generated.", style=gui.style.info)
         else:
             if not schema_path.is_file():
@@ -323,7 +321,7 @@ def create_ddl(schema_path, changed, args):
             with open(schema_path) as f:
                 package = Package(json.load(f))
                 for res in package.resources:
-                    table = write_table(engine, res.schema, args, fk, table_name=res.name)
+                    table = write_table(engine, res.schema, fk, table_name=res.name)
                     table = table.to_metadata(meta)
                     tables.append(table)
 
@@ -333,10 +331,10 @@ def create_ddl(schema_path, changed, args):
                     lines = [line for line in str(tbl_ddl).splitlines()]
                     f.write("\n".join([line for line in lines if line.strip()]) + ";\n\n")
 
-    if args.stop == "ddl":
-        gui.show(args, ddl_fk_file)
+    if cfg.stop == "ddl":
+        gui.show(cfg, ddl_fk_file)
 
-    if args.target.type == "sqlite":
+    if cfg.target.type == "sqlite":
         return ddl_fk_file
 
     return ddl_file
