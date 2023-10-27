@@ -148,10 +148,11 @@ def create_schema(cfg, changed, tables=[], schema_path=None):
     else:
         target_name = "partial"
 
+    # import csv
     dialect = {
         "delimiter": "\t",
-        # "quoteChar": "",
-        # "escapeChar": "",
+        "quoteChar": None,
+        "escapeChar": None,
         "doubleQuote": False,
         "skipInitialSpace": False,
     }
