@@ -20,6 +20,8 @@ import jdbc
 from sqlite_utils import Database
 from sqlite_utils.db import NotFoundError
 from toposort import toposort_flatten
+from pathlib import Path
+import json
 
 
 @dataclass
@@ -150,35 +152,99 @@ def create_db(path):
 
     return configdb
 
+def has_cycle(graph):
+    """
+    Detects circular dependencies in a graph represented as a dictionary.
+
+    Args:
+        graph (dict): A dictionary where keys are nodes and values are lists of their dependencies.
+
+    Returns:
+        bool: True if the graph has a circular dependency, False otherwise.
+
+    Raises:
+        None
+
+    Algorithm:
+    This function uses depth-first search (DFS) to explore the graph. During the traversal,
+    if a node is encountered that is already in the current recursion stack, it indicates a cycle,
+    and the function returns True. If no cycles are found after the traversal, the function returns False.
+    """
+    def dfs(node, visited, recursion_stack):
+        visited[node] = True
+        recursion_stack[node] = True
+
+        # Visit all neighbors
+        for neighbor in graph.get(node, []):
+            if not visited[neighbor]:
+                if dfs(neighbor, visited, recursion_stack):
+                    return True
+            elif recursion_stack[neighbor]:
+                return True
+
+        # Remove the node from the recursion stack after exploration
+        recursion_stack[node] = False
+        return False
+
+    # Dictionary to keep track of visited nodes
+    visited = {node: False for node in graph}
+    
+    # Dictionary to keep track of nodes in the current DFS recursion stack
+    recursion_stack = {node: False for node in graph}
+
+    # Check for cycles using DFS
+    for node in graph:
+        if not visited[node]:
+            if dfs(node, visited, recursion_stack):
+                return True  # Found a cycle
+
+    return False  # No cycle found
 
 def update_table_deps(tables, cfg):
     """
     Write dependent tables per table to config database
     """
-    gui.print_msg("Get dependencies per table...", style=gui.style.info)
-
+    
+    deps_file = Path(cfg.tmp_dir, cfg.target_name + "-deps.json")
     deps_dict = {}
-    for table in tables:
-        table_deps = set()
-        for row in cfg.config_db.query(f"""
-                SELECT c.source_column,
-                       f.source_ref_column,
-                       f.source_ref_table
-                FROM foreign_keys f
-                  LEFT JOIN columns c
-                         ON c.source_column = f.source_column
-                        AND c.source_table = f.source_table
-                WHERE c.source_table = '{table}'
-                """):
-            ref_table = row["source_ref_table"]
-            if ref_table in tables:
-                table_deps.add(ref_table)
+    
+    # Check if we have a json file containing dependencies
+    if deps_file.exists():
+        # Read from file
+        gui.print_msg("Reading dependencies from file...", style=gui.style.info)
+        with open(deps_file, 'r', encoding='utf-8') as file:
+            deps_dict = json.load(file)
+ 
+    else:
+        # Nope, no file. Create new dependency map.
+        gui.print_msg("Get dependencies per table...", style=gui.style.info)
+        for table in tables:
+            table_deps = set()
+            for row in cfg.config_db.query(f"""
+                    SELECT c.source_column,
+                        f.source_ref_column,
+                        f.source_ref_table
+                    FROM foreign_keys f
+                    LEFT JOIN columns c
+                            ON c.source_column = f.source_column
+                            AND c.source_table = f.source_table
+                    WHERE c.source_table = '{table}'
+                    """):
+                ref_table = row["source_ref_table"]
+                if ref_table in tables:
+                    table_deps.add(ref_table)
 
-        if len(table_deps) == 0:
-            table_deps.add(table)
+            if len(table_deps) == 0:
+                table_deps.add(table)
 
-        deps_dict[table] = list(table_deps)
+            deps_dict[table] = list(table_deps)
 
+    if has_cycle(deps_dict):
+        with open(deps_file, 'w', encoding='utf-8') as file:
+            json.dump(deps_dict, file, ensure_ascii=False, indent=4)
+        gui.print_msg("Cyclic dependencies detected, dependencies written to '" + str(deps_file) +
+                      "'. Aborting, please review this file and then re-run the program.", exit=True)
+    
     sorted_tables = toposort_flatten(deps_dict)
     order = 0
     for table in sorted_tables:
