@@ -1046,7 +1046,7 @@ def fix_column_size(tables, first_run, cfg):
                 source_column = '"' + source_column + '"'
 
             max_length = str(
-                jdbc.query_single_value("SELECT MAX(LENGTH(" + source_column + ")) FROM " + source_table) or -1)
+                jdbc.query_single_value("SELECT MAX(LENGTH(" + source_column + ")) FROM " + source_table) or 0)
             cfg.config_db["columns"].update(row["tbl_col_pos"], {"source_column_size": max_length, "fixed_size": 1})
             fixed[str(row["tbl_col_pos"])] = max_length  # Undetectable column lengths (eg oracle long) are saved as -1
 
