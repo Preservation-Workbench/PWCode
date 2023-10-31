@@ -954,6 +954,39 @@ def get_table_count(jdbc, table_name, cfg):
     return int(row_count)
 
 
+def get_empty_rows(jdbc, source_table, cfg):
+    source_columns = []
+    for row in cfg.config_db.query(f"""
+            SELECT source_column
+            FROM columns
+            WHERE source_table = '{source_table}'
+            """):
+        source_column = str(row["source_column"])
+        if jdbc.type != "interbase":
+            source_column = '"' + source_column + '"'
+
+        if jdbc.type == "sqlite":
+            source_columns.append(" AND IFNULL(" + source_column + ",'') = ''")
+        else:
+            source_columns.append(source_column)
+
+    if jdbc.type == "sqlite":
+        sql = "SELECT COUNT(*) FROM " + source_table + " WHERE " + "".join(source_columns)[5:]
+    else:
+        sql = "SELECT COUNT(*) FROM " + source_table + " WHERE COLESCE(" + ",".join(source_columns) + ") IS NULL"
+
+    dbo = get_conn(jdbc.url.replace('"', ""), cfg)
+    conn = dbo.connection
+    table_reader_cursor = conn.cursor()
+    table_reader_cursor.execute(sql)
+    (empty_rows, ) = table_reader_cursor.fetchone()
+
+    cfg.config_db["tables"].update(source_table, {"empty_rows": empty_rows})
+
+    table_reader_cursor.close()
+    conn.close()
+
+
 def get_all_tables_count(jdbc, cfg, keys=True):
     source_or_target = "target"
     matches = [" ", "$"]
@@ -1016,10 +1049,13 @@ def get_all_tables_count(jdbc, cfg, keys=True):
             get_columns(jdbc, db_table, cfg, source_table)
             get_foreign_keys(jdbc, db_table, cfg, source_table)
 
+            if jdbc == cfg.source:
+                get_empty_rows(jdbc, source_table, cfg)
+
     return configdb.get_tables_count(jdbc, cfg)
 
 
-def fix_column_size(tables, first_run, cfg):
+def fix_columns_rows(tables, first_run, cfg):
     if first_run:
         configdb.connect_column_fk(cfg)
 

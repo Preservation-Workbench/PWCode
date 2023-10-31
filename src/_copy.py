@@ -83,7 +83,7 @@ def get_include_tables(cfg):
 
     if tables and not set(tables).issubset(copied_tables):
         configdb.update_table_deps(tables, cfg)
-        jdbc.fix_column_size(tables, first_run, cfg)
+        jdbc.fix_columns_rows(tables, first_run, cfg)
         changed = True
 
     return changed

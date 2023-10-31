@@ -70,6 +70,7 @@ def create_db(path):
             "include": int,  # Include in list of tables to sync
             "created": int,  # Target table created if == 1
             "validated": int,  # Exported as tsv and validated against datapackage schema
+            "empty_rows": int,  # No of completely enpty rows
         },
         pk="source_name",
         defaults={
@@ -152,6 +153,7 @@ def create_db(path):
 
     return configdb
 
+
 def has_cycle(graph):
     """
     Detects circular dependencies in a graph represented as a dictionary.
@@ -170,6 +172,7 @@ def has_cycle(graph):
     if a node is encountered that is already in the current recursion stack, it indicates a cycle,
     and the function returns True. If no cycles are found after the traversal, the function returns False.
     """
+
     def dfs(node, visited, recursion_stack):
         visited[node] = True
         recursion_stack[node] = True
@@ -188,7 +191,7 @@ def has_cycle(graph):
 
     # Dictionary to keep track of visited nodes
     visited = {node: False for node in graph}
-    
+
     # Dictionary to keep track of nodes in the current DFS recursion stack
     recursion_stack = {node: False for node in graph}
 
@@ -200,21 +203,22 @@ def has_cycle(graph):
 
     return False  # No cycle found
 
+
 def update_table_deps(tables, cfg):
     """
     Write dependent tables per table to config database
     """
-    
+
     deps_file = Path(cfg.tmp_dir, cfg.target_name + "-deps.json")
     deps_dict = {}
-    
+
     # Check if we have a json file containing dependencies
     if deps_file.exists():
         # Read from file
         gui.print_msg("Reading dependencies from file...", style=gui.style.info)
         with open(deps_file, 'r', encoding='utf-8') as file:
             deps_dict = json.load(file)
- 
+
     else:
         # Nope, no file. Create new dependency map.
         gui.print_msg("Get dependencies per table...", style=gui.style.info)
@@ -243,8 +247,9 @@ def update_table_deps(tables, cfg):
         with open(deps_file, 'w', encoding='utf-8') as file:
             json.dump(deps_dict, file, ensure_ascii=False, indent=4)
         gui.print_msg("Cyclic dependencies detected, dependencies written to '" + str(deps_file) +
-                      "'. Aborting, please review this file and then re-run the program.", exit=True)
-    
+                      "'. Aborting, please review this file and then re-run the program.",
+                      exit=True)
+
     sorted_tables = toposort_flatten(deps_dict)
     order = 0
     for table in sorted_tables:
