@@ -247,7 +247,7 @@ def create_schema(cfg, changed, tables=[], schema_path=None):
                   LEFT JOIN columns c
                          ON c.source_column = f.source_column
                         AND c.source_table = f.source_table
-                WHERE c.source_table = '{source_table}'
+                WHERE c.source_table = '{source_table}' AND f.is_enabled = True
                 """):
             source_ref_table = str(row["source_ref_table"])
             if source_ref_table not in norm_tables:

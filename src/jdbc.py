@@ -877,6 +877,7 @@ def get_foreign_keys(jdbc, table, cfg, source_table):
                     "source_column": str(row[7]),
                     "source_ref_table": str(row[2]),
                     "source_ref_column": str(row[3]),
+                    "is_enabled": False,
                 },
                 pk="source_name",
             )

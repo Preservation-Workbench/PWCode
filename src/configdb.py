@@ -128,6 +128,7 @@ def create_db(path):
             "target_ref_table": str,
             "source_ref_column": str,
             "target_ref_column": str,
+            "is_enabled": bool,
         },
         pk="source_name",
         foreign_keys=[
@@ -245,6 +246,20 @@ def update_table_deps(tables, cfg):
         gui.print_msg("Cyclic dependencies detected, dependencies written to '" + str(deps_file) +
                       "'. Aborting, please review this file and then re-run the program.", exit=True)
     
+    # Update 'foreign_keys' table and enable the active constraints.
+    r = 0
+    for dep, val in deps_dict.items():
+        if dep and val:
+            for v in val:
+                r += 1
+                cfg.config_db.execute(f"""
+                    UPDATE foreign_keys
+                    SET is_enabled = True
+                    WHERE source_table = '{dep}' AND source_ref_table = '{v}'
+                """)
+    print(f"{r} constraint(s) enabled.")
+    
+    # Update 'tables' table with dependencies.
     sorted_tables = toposort_flatten(deps_dict)
     order = 0
     for table in sorted_tables:
