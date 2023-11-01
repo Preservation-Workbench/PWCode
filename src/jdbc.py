@@ -974,7 +974,7 @@ def get_empty_rows(jdbc, source_table, cfg):
     if jdbc.type == "sqlite":
         sql = "SELECT COUNT(*) FROM " + source_table + " WHERE " + "".join(source_columns)[5:]
     else:
-        sql = "SELECT COUNT(*) FROM " + source_table + " WHERE COLESCE(" + ",".join(source_columns) + ") IS NULL"
+        sql = "SELECT COUNT(*) FROM " + source_table + " WHERE COALESCE(" + ",".join(source_columns) + ") IS NULL"
 
     dbo = get_conn(jdbc.url.replace('"', ""), cfg)
     conn = dbo.connection
