@@ -963,7 +963,7 @@ def get_empty_rows(jdbc, source_table, cfg):
             WHERE source_table = '{source_table}'
             """):
         source_column = str(row["source_column"])
-        if jdbc.type != "interbase":
+        if jdbc.type not in ["interbase", "oracle"]:
             source_column = '"' + source_column + '"'
 
         if jdbc.type == "sqlite":
@@ -973,6 +973,8 @@ def get_empty_rows(jdbc, source_table, cfg):
 
     if jdbc.type == "sqlite":
         sql = "SELECT COUNT(*) FROM " + source_table + " WHERE " + "".join(source_columns)[5:]
+    elif jdbc.type == "oracle":
+        sql = "SELECT COUNT(*) FROM " + source_table + " WHERE ORA_HASH(" + " || ".join(source_columns) + ") IS NULL"
     else:
         sql = "SELECT COUNT(*) FROM " + source_table + " WHERE COALESCE(" + ",".join(source_columns) + ") IS NULL"
 
@@ -1051,7 +1053,7 @@ def get_all_tables_count(jdbc, cfg, keys=True):
             get_foreign_keys(jdbc, db_table, cfg, source_table)
 
             if jdbc == cfg.source:
-                get_empty_rows(jdbc, source_table, cfg)
+                get_empty_rows(jdbc, db_table, cfg)
 
     return configdb.get_tables_count(jdbc, cfg)
 
@@ -1063,6 +1065,10 @@ def fix_columns_rows(tables, first_run, cfg):
     gui.print_msg("Correcting columm lengths...", style=gui.style.info)
     jdbc = cfg.source
     conn = jdbc.connection
+
+    length_func = "LENGTH"
+    if jdbc.type == "sqlserver":
+        length_func = "LEN"
 
     fixed = {}
     for row in cfg.config_db["columns"].rows:
@@ -1083,7 +1089,8 @@ def fix_columns_rows(tables, first_run, cfg):
                 source_column = '"' + source_column + '"'
 
             max_length = str(
-                jdbc.query_single_value("SELECT MAX(LENGTH(" + source_column + ")) FROM " + source_table) or 0)
+                jdbc.query_single_value("SELECT MAX(" + length_func + "(" + source_column + ")) FROM " + source_table)
+                or 0)
             cfg.config_db["columns"].update(row["tbl_col_pos"], {"source_column_size": max_length, "fixed_size": 1})
             fixed[str(row["tbl_col_pos"])] = max_length  # Undetectable column lengths (eg oracle long) are saved as -1
 
