@@ -189,8 +189,11 @@ def create_schema(cfg, changed, tables=[], schema_path=None):
         source_table = str(row["source_name"])
         norm_table = str(row["norm_name"])
         source_pk = str(row["source_pk"])
-        row_count = str(row["source_row_count"])
         deps = str(row["deps"])
+
+        row_count = int(row["source_row_count"])
+        empty_rows = int(row["empty_rows"])
+        row_count = str(row_count - empty_rows)
 
         if len(tables) > 0 and source_table not in tables:
             continue
