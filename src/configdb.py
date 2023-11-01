@@ -180,6 +180,8 @@ def has_cycle(graph):
 
         # Visit all neighbors
         for neighbor in graph.get(node, []):
+            if neighbor == node:  # Skip self-references
+                continue
             if not visited[neighbor]:
                 if dfs(neighbor, visited, recursion_stack):
                     return True
