@@ -1068,7 +1068,7 @@ def fix_columns_rows(tables, first_run, cfg):
 
     length_func = "LENGTH"
     if jdbc.type == "sqlserver":
-        length_func = "LEN"
+        length_func = "Datalength"
 
     fixed = {}
     for row in cfg.config_db["columns"].rows:
