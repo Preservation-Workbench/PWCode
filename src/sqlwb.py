@@ -109,6 +109,10 @@ def get_copy_statements(json_schema_file, cfg, diff_data):
                             fixed_source_column_name = ("FORMAT(" + source_quote(source_column_name) +
                                                         ", 'yyyy-MM-dd HH:nn:ss') AS " +
                                                         source_quote(target_column_name) + ",")
+                        elif cfg.source.type == "mssql":
+                            fixed_source_column_name = ("FORMAT(" + source_quote(source_column_name) +
+                                                        ", 'yyyy-MM-dd hh:mm:ss') AS " +
+                                                        source_quote(target_column_name) + ",")
                         else:
                             gui.print_msg(
                                 "Datetime to formatted string in sqlite not implemented for '" + cfg.source.type + "'",
@@ -127,6 +131,9 @@ def get_copy_statements(json_schema_file, cfg, diff_data):
                         elif cfg.source.type == "access":
                             fixed_source_column_name = ("FORMAT(" + source_quote(source_column_name) +
                                                         ", 'HH:nn:ss') AS " + source_quote(target_column_name) + ",")
+                        elif cfg.source.type == "mssql":
+                            fixed_source_column_name = ("FORMAT(" + source_quote(source_column_name) +
+                                                        ", 'hh:mm:ss') AS " + source_quote(target_column_name) + ",")
                         else:
                             gui.print_msg(
                                 "Time to formatted string in sqlite not implemented for '" + cfg.source.type + "'",
