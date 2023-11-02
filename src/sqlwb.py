@@ -63,6 +63,9 @@ def get_copy_statements(json_schema_file, cfg, diff_data):
 
         source_type = cfg.source.type.replace("access", 'access+pyodbc')
         target_type = cfg.target.type.replace("access", 'access+pyodbc')
+        
+        source_type = cfg.source.type.replace("sqlserver", 'mssql')
+        target_type = cfg.target.type.replace("sqlserver", 'mssql')
 
         source_quote = create_engine("%s://" % source_type, strategy="mock",
                                      executor=_dump).dialect.identifier_preparer.quote
