@@ -19,6 +19,8 @@ def detect_cycles(data):
         temporarily_visited.add(node)
 
         for neighbor in graph.get(node, []):
+            if neighbor == node:
+                continue
             dfs(neighbor, path + [neighbor], temporarily_visited)
 
         temporarily_visited.remove(node)
