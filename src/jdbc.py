@@ -190,7 +190,7 @@ class Dbo:
         elif self.login.startswith("jdbc:sqlserver:") and ("sqlserver" in cfg.jdbc_drivers):
             self.type = "sqlserver"
             self.url = login
-            self.short_url = login
+            self.short_url = login + ";trustServerCertificate=true"
             self.user = re.search(r'user=(\w+)', login, re.IGNORECASE).group(1)
             self.password = re.search(r'password=(\w+)', login, re.IGNORECASE).group(1)
             self.schema = re.search(r'\\(\w+)', login).group(1)
