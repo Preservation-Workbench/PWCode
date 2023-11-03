@@ -212,7 +212,7 @@ def run_ddl_file(jdbc, cfg, diff_tables, ddl_file, echo=False):
 
 def get_connect_cmd(jdbc, cfg):
     connect_cmd = " ".join((
-        "WbConnect -url=" + jdbc.short_url,
+        "WbConnect -url='" + jdbc.short_url +"'",
         "-username=" + jdbc.user,
         "-password=" + jdbc.password,
         "-driverJar=" + cfg.jdbc_drivers[jdbc.type]["jar"],
