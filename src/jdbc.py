@@ -189,11 +189,11 @@ class Dbo:
             self.always_escape = False
         elif self.login.startswith("jdbc:sqlserver:") and ("sqlserver" in cfg.jdbc_drivers):
             self.type = "sqlserver"
-            self.url = login + ";trustServerCertificate=true"
-            self.short_url = login + ";trustServerCertificate=true"
+            self.url = login + ";encrypt=true;trustServerCertificate=true"
+            self.short_url = self.url
             self.user = re.search(r'user=(\w+)', login, re.IGNORECASE).group(1)
             self.password = re.search(r'password=(\w+)', login, re.IGNORECASE).group(1)
-            self.schema = re.search(r'\\(\w+)', login).group(1)
+            self.schema = "dbo"
             self.credentials = None
             self.always_escape = False
         # elif login.startswith("jdbc:interbase:") and ("interbase" in JDBC_DRIVERS):
@@ -975,6 +975,8 @@ def get_empty_rows(jdbc, source_table, cfg):
         sql = "SELECT COUNT(*) FROM " + source_table + " WHERE " + "".join(source_columns)[5:]
     elif jdbc.type == "oracle":
         sql = "SELECT COUNT(*) FROM " + source_table + " WHERE ORA_HASH(" + " || ".join(source_columns) + ") IS NULL"
+    elif jdbc.type == "sqlserver":
+        sql = "SELECT COUNT(*) FROM " + source_table + " WHERE CONCAT(" + ",".join(source_columns) + ") IS NULL"
     else:
         sql = "SELECT COUNT(*) FROM " + source_table + " WHERE COALESCE(" + ",".join(source_columns) + ") IS NULL"
 

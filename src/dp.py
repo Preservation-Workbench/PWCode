@@ -180,6 +180,7 @@ def create_schema(cfg, changed, tables=[], schema_path=None):
                    norm_name,
                    source_pk,
                    source_row_count,
+                   empty_rows,
                    deps
             FROM tables
             WHERE source_row_count > 0
