@@ -21,7 +21,7 @@ import json
 import shutil
 import csv
 
-from utils import _file
+from utils import _file, _dict
 from command_runner import command_runner
 from rich.prompt import Confirm
 import configdb
@@ -215,6 +215,7 @@ def ensure_config_db(db_path, schema_path):
 
 def archive_db(source, main_cfg):
     cfg = get_archive_cfg(source, main_cfg)
+    has_empty_rows = False
 
     export_blobs = True
     sub_system = configdb.get_sub_system(cfg.content_dir.name, cfg.config_db)
@@ -229,6 +230,7 @@ def archive_db(source, main_cfg):
     dbo = jdbc.get_conn("jdbc:sqlite:" + str(cfg.source), cfg)
     validated_tables = configdb.get_validated_tables(cfg)
     table_deps = configdb.get_tables_deps(cfg)
+    norm_tables = configdb.get_norm_tables(cfg.config_db)
     archived_tables = []
     deps_list = []
 
@@ -277,14 +279,19 @@ def archive_db(source, main_cfg):
             fix_table(dbo, table, text_columns, cfg)
             result = sqlwb.export_text_columns(dbo, table, text_columns, tsv_path, cfg)
 
-            if row_count_check(tsv_path, table) is False or result == "Error":
-                gui.print_msg("Wrong row count! Re-exporting with alternate method...", style=gui.style.info)
+            if str(result) == "Error":
                 if tsv_path.is_file():
                     tsv_path.unlink()
 
-                export_text_columns(dbo, table, text_columns, tsv_path, cfg)
-                if row_count_check(tsv_path, table) is False:
-                    gui.print_msg("Wrong row count!", exit=True)
+                gui.print_msg(str(result), exit=True)
+
+            tsv_row_count = get_tsv_row_count(tsv_path)
+            db_row_count = int(table.custom["count_of_rows"])
+            if db_row_count > tsv_row_count:
+                empty_rows = str(db_row_count - tsv_row_count)
+                has_empty_rows = True
+                source_table = _dict.get_key_from_value(norm_tables, table)
+                cfg.config_db["tables"].update(source_table, {"empty_rows": empty_rows})
 
             for file_column in file_columns:
                 export_file_column(dbo, table, file_column, cfg)
@@ -297,6 +304,9 @@ def archive_db(source, main_cfg):
 
         if len(deps_list) > 0:
             validate_tables(deps_list, table_deps, archived_tables, cfg)
+
+    if has_empty_rows:
+        dp.create_schema(cfg, True)
 
     if changed:
         gui.print_msg("Datapackage validated!", style=gui.style.ok)
@@ -315,7 +325,7 @@ def fix_table(dbo, table, text_columns, cfg):
         dbo.commit()
 
 
-def row_count_check(tsv_path, table):
+def get_tsv_row_count(tsv_path):
     print("Validating exported file...")
 
     def blocks(files, size=65536):
@@ -329,10 +339,7 @@ def row_count_check(tsv_path, table):
     with open(tsv_path, "r", encoding="utf-8", errors="ignore") as f:
         tsv_row_count = int(sum(bl.count("\n") for bl in blocks(f))) - 1
 
-    if int(table.custom["count_of_rows"]) != tsv_row_count:
-        return False
-
-    return True
+    return tsv_row_count
 
 
 def archive_dir(source, cfg):
