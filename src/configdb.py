@@ -81,6 +81,7 @@ def create_db(path):
             "include": 0,
             "created": 0,
             "validated": 0,
+            "empty_rows": 0,
         },
         if_not_exists=True,
     )

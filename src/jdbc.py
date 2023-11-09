@@ -955,43 +955,6 @@ def get_table_count(jdbc, table_name, cfg):
     return int(row_count)
 
 
-def get_empty_rows(jdbc, source_table, cfg):
-    source_columns = []
-    for row in cfg.config_db.query(f"""
-            SELECT source_column
-            FROM columns
-            WHERE source_table = '{source_table}'
-            """):
-        source_column = str(row["source_column"])
-        if jdbc.type not in ["interbase", "oracle"]:
-            source_column = '"' + source_column + '"'
-
-        if jdbc.type == "sqlite":
-            source_columns.append(" AND IFNULL(" + source_column + ",'') = ''")
-        else:
-            source_columns.append(source_column)
-
-    if jdbc.type == "sqlite":
-        sql = "SELECT COUNT(*) FROM " + source_table + " WHERE " + "".join(source_columns)[5:]
-    elif jdbc.type == "oracle":
-        sql = "SELECT COUNT(*) FROM " + source_table + " WHERE ORA_HASH(" + " || ".join(source_columns) + ") IS NULL"
-    elif jdbc.type == "sqlserver":
-        sql = "SELECT COUNT(*) FROM " + source_table + " WHERE CONCAT(" + ",".join(source_columns) + ") IS NULL"
-    else:
-        sql = "SELECT COUNT(*) FROM " + source_table + " WHERE COALESCE(" + ",".join(source_columns) + ") IS NULL"
-
-    dbo = get_conn(jdbc.url.replace('"', ""), cfg)
-    conn = dbo.connection
-    table_reader_cursor = conn.cursor()
-    table_reader_cursor.execute(sql)
-    (empty_rows, ) = table_reader_cursor.fetchone()
-
-    cfg.config_db["tables"].update(source_table, {"empty_rows": empty_rows})
-
-    table_reader_cursor.close()
-    conn.close()
-
-
 def get_all_tables_count(jdbc, cfg, keys=True):
     source_or_target = "target"
     matches = [" ", "$"]
@@ -1053,9 +1016,6 @@ def get_all_tables_count(jdbc, cfg, keys=True):
             get_primary_key(jdbc, db_table, cfg, source_table)
             get_columns(jdbc, db_table, cfg, source_table)
             get_foreign_keys(jdbc, db_table, cfg, source_table)
-
-            if jdbc == cfg.source:
-                get_empty_rows(jdbc, db_table, cfg)
 
     return configdb.get_tables_count(jdbc, cfg)
 
