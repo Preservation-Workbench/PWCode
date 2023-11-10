@@ -20,6 +20,7 @@ import os
 import json
 import shutil
 import csv
+import fileinput
 
 from utils import _file, _dict
 from command_runner import command_runner
@@ -285,7 +286,7 @@ def archive_db(source, main_cfg):
 
                 gui.print_msg(str(result), exit=True)
 
-            tsv_row_count = get_tsv_row_count(tsv_path)
+            tsv_row_count = tsv_fix(tsv_path)
             db_row_count = int(table.custom["count_of_rows"])
             if db_row_count > tsv_row_count:
                 empty_rows = str(db_row_count - tsv_row_count)
@@ -316,6 +317,7 @@ def archive_db(source, main_cfg):
 
 def fix_table(dbo, table, text_columns, cfg):
     print("Removing any null bytes before exporting data...")
+
     for text_column in text_columns.keys():
         sql = ("UPDATE " + table.name + " SET " + text_column + " = substr(" + text_column + ",1,instr (" +
                text_column + ",CHAR(0)) - 1) || substr(CAST(" + text_column + " AS BLOB),instr (" + text_column +
@@ -325,19 +327,15 @@ def fix_table(dbo, table, text_columns, cfg):
         dbo.commit()
 
 
-def get_tsv_row_count(tsv_path):
-    print("Validating exported file...")
-
-    def blocks(files, size=65536):
-        while True:
-            b = files.read(size)
-            if not b:
-                break
-            yield b
+def tsv_fix(tsv_path):
+    print("Removing any empty lines...")
 
     tsv_row_count = 0
-    with open(tsv_path, "r", encoding="utf-8", errors="ignore") as f:
-        tsv_row_count = int(sum(bl.count("\n") for bl in blocks(f))) - 1
+    with fileinput.input(tsv_path, inplace=True) as f:
+        for line in f:
+            if line != "\n":
+                tsv_row_count += 1
+                print(line)
 
     return tsv_row_count
 
