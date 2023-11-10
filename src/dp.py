@@ -151,8 +151,8 @@ def create_schema(cfg, changed, tables=[], schema_path=None):
     # import csv
     dialect = {
         "delimiter": "\t",
-        "quoteChar": None,
-        "escapeChar": None,
+        "quoteChar": "\0",
+        "escapeChar": "\0",
         "doubleQuote": False,
         "skipInitialSpace": False,
     }
