@@ -17,6 +17,7 @@ from pathlib import Path
 from collections import OrderedDict
 import operator
 import os
+import sys
 import json
 import shutil
 import csv
@@ -333,9 +334,9 @@ def tsv_fix(tsv_path):
     tsv_row_count = 0
     with fileinput.input(tsv_path, inplace=True) as f:
         for line in f:
-            if line != "\n":
+            if len(line.replace("\t", "")) > 1:
                 tsv_row_count += 1
-                print(line)
+                sys.stdout.write(line)
 
     return tsv_row_count
 
