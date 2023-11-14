@@ -63,7 +63,7 @@ def get_copy_statements(json_schema_file, cfg, diff_data):
 
         source_type = cfg.source.type.replace("access", 'access+pyodbc')
         target_type = cfg.target.type.replace("access", 'access+pyodbc')
-        
+
         source_type = cfg.source.type.replace("sqlserver", 'mssql')
         target_type = cfg.target.type.replace("sqlserver", 'mssql')
 
@@ -212,7 +212,7 @@ def run_ddl_file(jdbc, cfg, diff_tables, ddl_file, echo=False):
 
 def get_connect_cmd(jdbc, cfg):
     connect_cmd = " ".join((
-        "WbConnect -url='" + jdbc.short_url +"'",
+        "WbConnect -url='" + jdbc.short_url + "'",
         "-username=" + jdbc.user,
         "-password=" + jdbc.password,
         "-driverJar=" + cfg.jdbc_drivers[jdbc.type]["jar"],
@@ -359,7 +359,48 @@ def run_copy_file(cfg, copy_file, diff_data):
     return cp_result
 
 
+# def export_records(select_recs: bool, fkey: dict):
+#     """Export records as sql
+#
+#     Parameters:
+#     select_recs: If records should be selected from existing database
+#     """
+#     if fkey and self.db.engine.name in ['mysql', 'postgresql', 'sqlite']:
+#         cols = self.db.refl.get_columns(self.name, self.db.schema)
+#         colnames = []
+#         for col in cols:
+#             colnames.append(col['name'])
+#
+#         select = ', '.join(colnames)
+#         fkey_cc = fkey['constrained_columns'][0]
+#         fkey_rc = fkey['referred_columns'][0]
+#         sql = f"""
+#         with recursive tbl_data as (
+#             select {self.name}.*, 1 as level
+#             from {self.name}
+#             where {fkey_cc} is null
+#
+#             union all
+#
+#             select this.*, prior.level + 1
+#             from tbl_data prior
+#             inner join {self.name} this
+#                on this.{fkey_cc} = prior.{fkey_rc}
+#         )
+#         select {select}
+#         from tbl_data
+#         order by level
+#         """
+#     else:
+#         sql = f"select * from {self.name}"
+
+
 def export_text_columns(dbo, table, text_columns, tsv_path, cfg):
+    for fk in table.schema.foreignKeys:
+        print(fk)
+        import sys
+        sys.exit()
+
     cmd = " ".join((
         get_connect_cmd(dbo, cfg),
         "WbExport",

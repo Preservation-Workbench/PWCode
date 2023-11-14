@@ -257,10 +257,14 @@ def create_schema(cfg, changed, tables=[], schema_path=None):
             if source_ref_table not in norm_tables:
                 continue
 
+            target_table = norm_tables[source_ref_table]
+            if target_table == norm_table:
+                target_table = ""
+
             foreign_keys.append({
                 "fields": str(row["norm_column"]),
                 "reference": {
-                    "resource": norm_tables[source_ref_table],
+                    "resource": target_table,
                     "fields": norm_columns[source_ref_table + ":" + str(row["source_ref_column"])],
                 },
             })
