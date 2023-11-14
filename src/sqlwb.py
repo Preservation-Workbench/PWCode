@@ -139,6 +139,13 @@ def get_copy_statements(json_schema_file, cfg, diff_data):
                                 "Time to formatted string in sqlite not implemented for '" + cfg.source.type + "'",
                                 exit=True,
                             )
+                    
+                    # Un-mangle GUIDs stored in RAW columns in oracle.
+                    elif jdbc_data_type == -3 and cfg.target.type == "sqlite":
+                        if cfg.source.type == "oracle":
+                            fixed_source_column_name = ("UTL_RAW.CAST_TO_VARCHAR2(UTL_RAW.CAST_TO_RAW("+ 
+                                                        source_quote(source_column_name)+ ")) AS " +
+                                                        source_quote(target_column_name) + ",")
 
                     elif source_column_name.lower() == target_column_name.lower():
                         fixed_source_column_name = source_quote(source_column_name) + ","
