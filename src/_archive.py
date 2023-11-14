@@ -279,7 +279,39 @@ def archive_db(source, main_cfg):
                     text_columns[field.name] = field.name
 
             fix_table(dbo, table, text_columns, cfg)
-            result = sqlwb.export_text_columns(dbo, table, text_columns, tsv_path, cfg)
+
+            fields = []
+            foreign_fields = []
+            for fk in table.schema.foreign_keys:
+                foreign_table_name = fk["reference"]["resource"]
+                if foreign_table_name == table.name:
+                    fields.append(fk["fields"])
+                    foreign_fields.append(fk["reference"]["fields"])
+
+            if foreign_fields:  # Is self referencing
+                select = ", ".join(text_columns.values())
+
+                sql = f"""
+                with recursive tbl_data as (
+                    select {table.name}.*, 1 as level
+                    from {table.name}
+                    where {fields} is null
+
+                    union all
+
+                    select this.*, prior.level + 1
+                    from tbl_data prior
+                    inner join {table.name} this
+                       on this.{fields} = prior.{foreign_fields}
+                )
+                select {select}
+                from tbl_data
+                order by level;
+                """
+            else:
+                sql = f"select * from {table.name};"
+
+            result = sqlwb.export_text_columns(dbo, sql, text_columns, tsv_path, cfg)
 
             if str(result) == "Error":
                 if tsv_path.is_file():
