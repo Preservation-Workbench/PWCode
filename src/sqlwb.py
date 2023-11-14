@@ -103,7 +103,7 @@ def get_copy_statements(json_schema_file, cfg, diff_data):
                                                         ",")
                         elif cfg.source.type == "oracle":
                             fixed_source_column_name = ("TO_CHAR(" + source_quote(source_column_name) +
-                                                        ",'YYYY-MM-DD HH24:MM:SS') AS " +
+                                                        ",'YYYY-MM-DD HH24:MI:SS') AS " +
                                                         source_quote(target_column_name) + ",")
                         elif cfg.source.type == "access":
                             fixed_source_column_name = ("FORMAT(" + source_quote(source_column_name) +
@@ -127,7 +127,7 @@ def get_copy_statements(json_schema_file, cfg, diff_data):
                                                         source_quote(target_column_name) + ",")
                         elif cfg.source.type == "oracle":
                             fixed_source_column_name = ("TO_CHAR(" + source_quote(source_column_name) +
-                                                        ",'HH24:MM:SS') AS " + source_quote(target_column_name) + ",")
+                                                        ",'HH24:MI:SS') AS " + source_quote(target_column_name) + ",")
                         elif cfg.source.type == "access":
                             fixed_source_column_name = ("FORMAT(" + source_quote(source_column_name) +
                                                         ", 'HH:nn:ss') AS " + source_quote(target_column_name) + ",")
