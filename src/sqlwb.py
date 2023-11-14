@@ -396,10 +396,10 @@ def run_copy_file(cfg, copy_file, diff_data):
 
 
 def export_text_columns(dbo, table, text_columns, tsv_path, cfg):
-    for fk in table.schema.foreignKeys:
-        print(fk)
-        import sys
-        sys.exit()
+    # for fk in table.schema.foreignKeys: # TODO: Virker ikke --> angi hvordan?
+    #     print(fk)
+    #     import sys
+    #     sys.exit()
 
     cmd = " ".join((
         get_connect_cmd(dbo, cfg),
