@@ -21,6 +21,7 @@ import jpype as jp
 from frictionless import Package
 from utils import _dict
 import jdbc
+import dp
 import gui
 from sqlalchemy import create_engine
 import configdb
@@ -77,12 +78,6 @@ def get_copy_statements(json_schema_file, cfg, diff_data):
             package = Package(json.load(f))
 
             for table in package.resources:
-                source_table_name = table.custom["db_table_name"]
-                if cfg.schema:
-                    source_table_name = cfg.schema + "." + source_table_name
-
-                target_table_name = target_quote(table.name)
-
                 ddl_columns = []
                 for field in table.schema.fields:
                     source_column_name = field.custom["db_column_name"]
@@ -139,12 +134,12 @@ def get_copy_statements(json_schema_file, cfg, diff_data):
                                 "Time to formatted string in sqlite not implemented for '" + cfg.source.type + "'",
                                 exit=True,
                             )
-                    
+
                     # Un-mangle GUIDs stored in RAW columns in oracle.
                     elif jdbc_data_type == -3 and cfg.target.type == "sqlite":
                         if cfg.source.type == "oracle":
-                            fixed_source_column_name = ("UTL_RAW.CAST_TO_VARCHAR2(UTL_RAW.CAST_TO_RAW("+ 
-                                                        source_quote(source_column_name)+ ")) AS " +
+                            fixed_source_column_name = ("UTL_RAW.CAST_TO_VARCHAR2(UTL_RAW.CAST_TO_RAW(" +
+                                                        source_quote(source_column_name) + ")) AS " +
                                                         source_quote(target_column_name) + ",")
 
                     elif source_column_name.lower() == target_column_name.lower():
@@ -155,16 +150,10 @@ def get_copy_statements(json_schema_file, cfg, diff_data):
 
                     ddl_columns.append(fixed_source_column_name)
 
-                source_query = " ".join((
-                    "SELECT",
-                    "".join(ddl_columns)[:-1],
-                    "FROM",
-                    source_table_name,
-                ))
-
+                select = dp.get_source_query(table, "".join(ddl_columns)[:-1], cfg)
                 copy_data_str = ("WbCopy " + params + '-targetConnection="username=' + cfg.target.user + ",password=" +
                                  cfg.target.password + ",url=" + url + '" -targetTable="' + cfg.target.schema + '".' +
-                                 target_table_name + " -sourceQuery=" + source_query + ";")
+                                 target_quote(table.name) + " -sourceQuery=" + select)
 
                 with open(copy_file, "a") as file:
                     file.write("\n" + copy_data_str)
@@ -366,7 +355,7 @@ def run_copy_file(cfg, copy_file, diff_data):
     return cp_result
 
 
-def export_text_columns(dbo, sql, text_columns, tsv_path, cfg):
+def export_text_columns(dbo, select, text_columns, tsv_path, cfg):
     cmd = " ".join((
         get_connect_cmd(dbo, cfg),
         "WbExport",
@@ -378,11 +367,11 @@ def export_text_columns(dbo, sql, text_columns, tsv_path, cfg):
         "-decimal='.'",
         "-maxDigits=0",
         "-lineEnding=lf",
-        "-replaceExpression='(\\n|\\r\\n|\\r|\\t)' -replaceWith=' '",
+        "-replaceExpression='(\\n|\\r\\n|\\r|\\t|\\x00)' -replaceWith=' '",
         "-trimCharData=true",
         "-nullString=''",
         "-showProgress=100000;",
-        sql,
+        select,
         "WbDisconnect;",
     ))
 

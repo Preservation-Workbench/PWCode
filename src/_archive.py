@@ -23,10 +23,10 @@ import shutil
 import csv
 import fileinput
 
-from utils import _file, _dict
 from command_runner import command_runner
 from rich.prompt import Confirm
 import configdb
+from utils import _file
 from frictionless import Package, validate
 import petl as etl
 import sqlwb
@@ -278,40 +278,8 @@ def archive_db(source, main_cfg):
                     text_columns[field.name] = field.name
 
             fix_table(dbo, table, text_columns, cfg)
-
-            fk_fields = []
-            fk_foreign_fields = []
-            fields = ", ".join(text_columns.values())
-            for fk in table.schema.foreign_keys:
-                if fk["reference"]["resource"] == "":
-                    fk_fields.extend(fk["fields"])
-                    fk_foreign_fields.extend(fk["reference"]["fields"])
-
-            if fk_foreign_fields:  # Is self referencing
-                fk_fields = ", ".join(fk_fields)
-                fk_foreign_fields = ", ".join(fk_foreign_fields)
-
-                sql = f"""
-                with recursive tbl_data as (
-                    select {table.name}.*, 1 as level
-                    from {table.name}
-                    where {fk_fields} is null
-
-                    union all
-
-                    select this.*, prior.level + 1
-                    from tbl_data prior
-                    inner join {table.name} this
-                       on this.{fk_fields} = prior.{fk_foreign_fields}
-                )
-                select {fields}
-                from tbl_data
-                order by level;
-                """
-            else:
-                sql = f"select {fields} from {table.name};"
-
-            result = sqlwb.export_text_columns(dbo, sql, text_columns, tsv_path, cfg)
+            select = dp.get_source_query(table, ", ".join(text_columns.values()), cfg)
+            result = sqlwb.export_text_columns(dbo, select, text_columns, tsv_path, cfg)
 
             if str(result) == "Error":
                 if tsv_path.is_file():
@@ -338,7 +306,7 @@ def archive_db(source, main_cfg):
         if len(deps_list) > 0:
             validate_tables(deps_list, table_deps, archived_tables, cfg)
 
-    if has_empty_rows:
+    if has_empty_rows:  # Update schema file row count to account for empty rows
         dp.create_schema(cfg, True)
 
     if changed:

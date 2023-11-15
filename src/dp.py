@@ -35,6 +35,50 @@ from sqlalchemy.dialects.oracle import VARCHAR2
 import configdb
 
 
+def get_source_query(table, columns, cfg):
+    if cfg.command == "copy":
+        source_table_name = table.custom["db_table_name"]
+        if cfg.schema:
+            source_table_name = cfg.schema + "." + source_table_name
+    else:
+        source_table_name = table.name
+
+    fk_fields = []
+    fk_foreign_fields = []
+    for fk in table.schema.foreign_keys:
+        if fk["reference"]["resource"] == "":
+            fk_fields.extend(fk["fields"])
+            fk_foreign_fields.extend(fk["reference"]["fields"])
+
+    if fk_foreign_fields:  # If self referencing, sort rows
+        # if cfg.command == "copy":
+
+        fk_fields = ", ".join(fk_fields)
+        fk_foreign_fields = ", ".join(fk_foreign_fields)
+
+        sql = f"""
+        WITH RECURSIVE tbl_data AS (
+            SELECT {source_table_name}.*, 1 AS LEVEL
+            FROM {source_table_name}
+            WHERE {fk_fields} IS NULL
+
+            UNION ALL
+
+            SELECT this.*, prior.level + 1
+            FROM tbl_data prior
+            INNER JOIN {source_table_name} this
+               ON this.{fk_fields} = prior.{fk_foreign_fields}
+        )
+        SELECT {columns}
+        FROM tbl_data
+        ORDER BY level;
+        """
+    else:
+        sql = f"SELECT {columns} from {source_table_name};"
+
+    return sql
+
+
 def write_field(engine, field):
     """Convert frictionless field to sqlalchemy type
     as e.g. Field(type=string) -> sa.Text
@@ -143,11 +187,6 @@ def create_schema(cfg, changed, tables=[], schema_path=None):
     if schema_path is None:
         schema_path = Path(cfg.content_dir, "datapackage.json")
 
-    if len(tables) == 0:
-        target_name = cfg.target_name
-    else:
-        target_name = "partial"
-
     # import csv
     dialect = {
         "delimiter": "\t",
@@ -168,7 +207,7 @@ def create_schema(cfg, changed, tables=[], schema_path=None):
         gui.print_msg("Generating datapackage.json...", style=gui.style.info)
 
     package = Package(
-        name=target_name,
+        name=cfg.content_dir.name,
         profile="tabular-data-package",
         resources=[],
     )
