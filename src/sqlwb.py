@@ -378,7 +378,7 @@ def export_text_columns(dbo, sql, text_columns, tsv_path, cfg):
         "-decimal='.'",
         "-maxDigits=0",
         "-lineEnding=lf",
-        "-replaceExpression='(\\n|\\r\\n|\\r|\\t)' -replaceWith=' '",
+        "-replaceExpression='(\\n|\\r\\n|\\r|\\t|\\x00)' -replaceWith=' '",
         "-trimCharData=true",
         "-nullString=''",
         "-showProgress=100000;",
