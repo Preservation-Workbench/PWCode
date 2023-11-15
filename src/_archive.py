@@ -232,7 +232,6 @@ def archive_db(source, main_cfg):
     dbo = jdbc.get_conn("jdbc:sqlite:" + str(cfg.source), cfg)
     validated_tables = configdb.get_validated_tables(cfg)
     table_deps = configdb.get_tables_deps(cfg)
-    norm_tables = configdb.get_norm_tables(cfg.config_db)
     archived_tables = []
     deps_list = []
 
@@ -325,8 +324,7 @@ def archive_db(source, main_cfg):
             if db_row_count > tsv_row_count:
                 empty_rows = str(db_row_count - tsv_row_count)
                 has_empty_rows = True
-                source_table = _dict.get_key_from_value(norm_tables, table)
-                cfg.config_db["tables"].update(source_table, {"empty_rows": empty_rows})
+                cfg.config_db["tables"].update(table.custom["db_table_name"], {"empty_rows": empty_rows})
 
             for file_column in file_columns:
                 export_file_column(dbo, table, file_column, cfg)
