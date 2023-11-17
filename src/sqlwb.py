@@ -78,7 +78,7 @@ def get_copy_statements(json_schema_file, cfg, diff_data):
             package = Package(json.load(f))
 
             for table in package.resources:
-                ddl_columns = []
+                ddl_columns = {}
                 for field in table.schema.fields:
                     source_column_name = field.custom["db_column_name"]
                     target_column_name = field.name
@@ -86,28 +86,27 @@ def get_copy_statements(json_schema_file, cfg, diff_data):
                     fixed_source_column_name = ""
 
                     if cfg.no_blobs and jdbc_data_type in [-4, -3, -2, 2004]:
-                        fixed_source_column_name = ("NULL AS " + source_quote(target_column_name) + ",")
+                        fixed_source_column_name = ("NULL AS " + source_quote(target_column_name))
                     elif jdbc_data_type in [91, 93] and cfg.target.type == "sqlite":
                         if cfg.source.type == "h2":
                             fixed_source_column_name = ("FORMATDATETIME(" + source_quote(source_column_name) +
                                                         ",'YYYY-MM-DD HH:mm:ss') AS " +
-                                                        source_quote(target_column_name) + ",")
+                                                        source_quote(target_column_name))
                         elif cfg.source.type == "sqlite":
                             fixed_source_column_name = ("DATETIME(SUBSTR(" + source_quote(source_column_name) +
-                                                        ",1,10), 'unixepoch') AS " + source_quote(target_column_name) +
-                                                        ",")
+                                                        ",1,10), 'unixepoch') AS " + source_quote(target_column_name))
                         elif cfg.source.type == "oracle":
                             fixed_source_column_name = ("TO_CHAR(" + source_quote(source_column_name) +
                                                         ",'YYYY-MM-DD HH24:MI:SS') AS " +
-                                                        source_quote(target_column_name) + ",")
+                                                        source_quote(target_column_name))
                         elif cfg.source.type == "access":
                             fixed_source_column_name = ("FORMAT(" + source_quote(source_column_name) +
                                                         ", 'yyyy-MM-dd HH:nn:ss') AS " +
-                                                        source_quote(target_column_name) + ",")
+                                                        source_quote(target_column_name))
                         elif cfg.source.type == "sqlserver":
                             fixed_source_column_name = ("FORMAT(" + source_quote(source_column_name) +
                                                         ", 'yyyy-MM-dd hh:mm:ss') AS " +
-                                                        source_quote(target_column_name) + ",")
+                                                        source_quote(target_column_name))
                         else:
                             gui.print_msg(
                                 "Datetime to formatted string in sqlite not implemented for '" + cfg.source.type + "'",
@@ -116,19 +115,19 @@ def get_copy_statements(json_schema_file, cfg, diff_data):
                     elif jdbc_data_type == 92 and cfg.target.type == "sqlite":
                         if cfg.source.type == "h2":
                             fixed_source_column_name = ("FORMATDATETIME(" + source_quote(source_column_name) +
-                                                        ",'HH:mm:ss') AS " + source_quote(target_column_name) + ",")
+                                                        ",'HH:mm:ss') AS " + source_quote(target_column_name))
                         elif cfg.source.type == "sqlite":
                             fixed_source_column_name = ("TIME(" + source_quote(source_column_name) + ") AS " +
-                                                        source_quote(target_column_name) + ",")
+                                                        source_quote(target_column_name))
                         elif cfg.source.type == "oracle":
                             fixed_source_column_name = ("TO_CHAR(" + source_quote(source_column_name) +
-                                                        ",'HH24:MI:SS') AS " + source_quote(target_column_name) + ",")
+                                                        ",'HH24:MI:SS') AS " + source_quote(target_column_name))
                         elif cfg.source.type == "access":
                             fixed_source_column_name = ("FORMAT(" + source_quote(source_column_name) +
-                                                        ", 'HH:nn:ss') AS " + source_quote(target_column_name) + ",")
+                                                        ", 'HH:nn:ss') AS " + source_quote(target_column_name))
                         elif cfg.source.type == "sqlserver":
                             fixed_source_column_name = ("FORMAT(" + source_quote(source_column_name) +
-                                                        ", 'hh:mm:ss') AS " + source_quote(target_column_name) + ",")
+                                                        ", 'hh:mm:ss') AS " + source_quote(target_column_name))
                         else:
                             gui.print_msg(
                                 "Time to formatted string in sqlite not implemented for '" + cfg.source.type + "'",
@@ -140,17 +139,18 @@ def get_copy_statements(json_schema_file, cfg, diff_data):
                         if cfg.source.type == "oracle":
                             fixed_source_column_name = ("UTL_RAW.CAST_TO_VARCHAR2(UTL_RAW.CAST_TO_RAW(" +
                                                         source_quote(source_column_name) + ")) AS " +
-                                                        source_quote(target_column_name) + ",")
+                                                        source_quote(target_column_name))
 
                     elif source_column_name.lower() == target_column_name.lower():
-                        fixed_source_column_name = source_quote(source_column_name) + ","
+                        fixed_source_column_name = source_quote(source_column_name)
                     else:
                         fixed_source_column_name = (source_quote(source_column_name) + " AS " +
-                                                    source_quote(target_column_name) + ",")
+                                                    source_quote(target_column_name))
 
-                    ddl_columns.append(fixed_source_column_name)
+                    ddl_columns[target_column_name] = fixed_source_column_name
 
-                select = dp.get_source_query(table, "".join(ddl_columns)[:-1], cfg)
+                select = dp.get_source_query(table, ddl_columns, cfg)
+
                 copy_data_str = ("WbCopy " + params + '-targetConnection="username=' + cfg.target.user + ",password=" +
                                  cfg.target.password + ",url=" + url + '" -targetTable="' + cfg.target.schema + '".' +
                                  target_quote(table.name) + " -sourceQuery=" + select)

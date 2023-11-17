@@ -35,7 +35,8 @@ from sqlalchemy.dialects.oracle import VARCHAR2
 import configdb
 
 
-def get_source_query(table, columns, cfg):
+def get_source_query(table, columns_dict, cfg):
+    fixed_columns = ", ".join(columns_dict.values())
     if cfg.command == "copy":
         source_table_name = table.custom["db_table_name"]
         if cfg.schema:
@@ -50,13 +51,15 @@ def get_source_query(table, columns, cfg):
             fk_fields.extend(fk["fields"])
             fk_foreign_fields.extend(fk["reference"]["fields"])
 
-    if fk_foreign_fields:  # If self referencing, sort rows
-        # if cfg.command == "copy":
+    if fk_foreign_fields:  # If self referencing, sort rows by constraint
+        if cfg.command == "copy":
+            fk_fields = [columns_dict.get(i, i) for i in fk_fields]
+            fk_foreign_fields = [columns_dict.get(i, i) for i in fk_foreign_fields]
 
         fk_fields = ", ".join(fk_fields)
         fk_foreign_fields = ", ".join(fk_foreign_fields)
 
-        sql = f"""
+        return f"""
         WITH RECURSIVE tbl_data AS (
             SELECT {source_table_name}.*, 1 AS LEVEL
             FROM {source_table_name}
@@ -69,14 +72,12 @@ def get_source_query(table, columns, cfg):
             INNER JOIN {source_table_name} this
                ON this.{fk_fields} = prior.{fk_foreign_fields}
         )
-        SELECT {columns}
+        SELECT {fixed_columns}
         FROM tbl_data
         ORDER BY level;
         """
-    else:
-        sql = f"SELECT {columns} from {source_table_name};"
 
-    return sql
+    return f"SELECT {fixed_columns} from {source_table_name};"
 
 
 def write_field(engine, field):

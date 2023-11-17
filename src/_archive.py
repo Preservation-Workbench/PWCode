@@ -277,7 +277,7 @@ def archive_db(source, main_cfg):
                     text_columns[field.name] = field.name
 
             fix_table(dbo, table, text_columns, cfg)
-            select = dp.get_source_query(table, ", ".join(text_columns.values()), cfg)
+            select = dp.get_source_query(table, text_columns, cfg)
             result = sqlwb.export_text_columns(dbo, select, text_columns, tsv_path, cfg)
 
             if str(result) == "Error":
