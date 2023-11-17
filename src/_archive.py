@@ -217,7 +217,6 @@ def ensure_config_db(db_path, schema_path):
 
 def archive_db(source, main_cfg):
     cfg = get_archive_cfg(source, main_cfg)
-    has_empty_rows = False
 
     export_blobs = True
     sub_system = configdb.get_sub_system(cfg.content_dir.name, cfg.config_db)
@@ -291,8 +290,8 @@ def archive_db(source, main_cfg):
             db_row_count = int(table.custom["count_of_rows"])
             if db_row_count > tsv_row_count:
                 empty_rows = str(db_row_count - tsv_row_count)
-                has_empty_rows = True
                 cfg.config_db["tables"].update(table.custom["db_table_name"], {"empty_rows": empty_rows})
+                dp.create_schema(cfg, True)  # Update schema file row count to account for empty rows
 
             for file_column in file_columns:
                 export_file_column(dbo, table, file_column, cfg)
@@ -305,9 +304,6 @@ def archive_db(source, main_cfg):
 
         if len(deps_list) > 0:
             validate_tables(deps_list, table_deps, archived_tables, cfg)
-
-    if has_empty_rows:  # Update schema file row count to account for empty rows
-        dp.create_schema(cfg, True)
 
     if changed:
         gui.print_msg("Datapackage validated!", style=gui.style.ok)
