@@ -59,23 +59,25 @@ def get_source_query(table, columns_dict, cfg):
         fk_fields = ", ".join(fk_fields)
         fk_foreign_fields = ", ".join(fk_foreign_fields)
 
-        return f"""
-        WITH RECURSIVE tbl_data AS (
-            SELECT {source_table_name}.*, 1 AS LEVEL
-            FROM {source_table_name}
-            WHERE {fk_fields} IS NULL
-
-            UNION ALL
-
-            SELECT this.*, prior.level + 1
-            FROM tbl_data prior
-            INNER JOIN {source_table_name} this
-               ON this.{fk_fields} = prior.{fk_foreign_fields}
-        )
-        SELECT {fixed_columns}
-        FROM tbl_data
-        ORDER BY level;
-        """
+        # @TODO This creates an unholy mess when creating the SqlWB query... FIX!
+        #return f"""
+        #WITH RECURSIVE tbl_data AS (
+        #    SELECT {source_table_name}.*, 1 AS LEVEL
+        #    FROM {source_table_name}
+        #    WHERE {fk_fields} IS NULL
+        #
+        #    UNION ALL
+        #
+        #    SELECT this.*, prior.level + 1
+        #    FROM tbl_data prior
+        #    INNER JOIN {source_table_name} this
+        #       ON this.{fk_fields} = prior.{fk_foreign_fields}
+        #)
+        #SELECT {fixed_columns}
+        #FROM tbl_data
+        #ORDER BY level;
+        #"""
+        return f"SELECT {fixed_columns} from {source_table_name};"
 
     return f"SELECT {fixed_columns} from {source_table_name};"
 
