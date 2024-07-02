@@ -105,7 +105,7 @@ def get_copy_statements(json_schema_file, cfg, diff_data):
                                                         source_quote(target_column_name))
                         elif cfg.source.type == "sqlserver":
                             fixed_source_column_name = ("FORMAT(" + source_quote(source_column_name) +
-                                                        ", 'yyyy-MM-dd hh:mm:ss') AS " +
+                                                        ", 'yyyy-MM-dd HH:mm:ss') AS " +
                                                         source_quote(target_column_name))
                         else:
                             gui.print_msg(
